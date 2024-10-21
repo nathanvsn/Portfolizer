@@ -1,0 +1,15 @@
+<h1>Projeto: {{ project.name }}</h1>
+<p>{{ project.markdown_content|safe }}</p>
+
+<h2>Imagens:</h2>
+<ul>
+    {% for resource in project.resources.all %}
+    <li><img src="{{ resource.file.url }}" alt="Imagem do Projeto"></li>
+    {% endfor %}
+</ul>
+
+{% if project.portfolio.user.profile.user_type == 'free' %}
+    <p>Limite de 2 imagens por projeto.</p>
+{% elif project.portfolio.user.profile.user_type == 'pro' %}
+    <p>Limite de 10 imagens por projeto.</p>
+{% endif %}

@@ -1,0 +1,17 @@
+<h1>Projeto: {{ project.name }}</h1>
+<div>
+    {{ project.html_content|safe }}
+</div>
+<div>
+    <style>{{ project.css_content|safe }}</style>
+</div>
+<div>
+    <script>{{ project.js_content|safe }}</script>
+</div>
+
+<h2>Recursos:</h2>
+<ul>
+    {% for resource in project.resources.all %}
+    <li><img src="{{ resource.file.url }}" alt="Imagem ou Vídeo"></li>
+    {% endfor %}
+</ul>
