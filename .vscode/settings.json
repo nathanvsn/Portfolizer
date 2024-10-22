@@ -8,5 +8,9 @@
             "group": "Projetos",
             "database": "${workspaceFolder:teste}/portfolio_saas/db.sqlite3"
         }
-    ]
+    ],
+    // Arquivos que não devem ser exibidos no explorer
+    "files.exclude": {
+        "**/__pycache__": true,
+    },
 }

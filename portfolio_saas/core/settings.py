@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'portfolios',
     'custom_auth',
     'pages', # App para páginas padrão
+    
+    # Django-taggit
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'portfolio_saas.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
@@ -73,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'portfolio_saas.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 LOGIN_REDIRECT_URL = 'pages:home'
 LOGOUT_REDIRECT_URL = 'pages:home'
