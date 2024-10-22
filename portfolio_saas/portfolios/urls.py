@@ -9,6 +9,8 @@ urlpatterns = [
 
     # Rota para upload de imagens ou recursos no projeto
     path('<str:username>/<str:project_name>/upload-resource/', views.upload_resource, name='upload_resource'),
+    path('<str:username>/<str:project_name>/upload-img/', views.upload_img_project, name='upload_img_project'),
+    path('<str:username>/<str:project_name>/delete-resource/<int:resource_id>/', views.delete_resource, name='delete_resource'),
 
 
 

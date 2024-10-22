@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block title %}Editar Projeto: {{ project.name }}{% endblock %}
+{% block imports %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -24,36 +27,67 @@
                 {% endif %}
             </div>
 
-            <!-- Formulário de Edição -->
+            <!-- Formulário de Edição (agora com o ProjectForm) -->
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ project_form.as_p }}
+                
+                {{ project_form.name.label_tag }}
+                {{ project_form.name }}
+            
+                {{ project_form.description.label_tag }}
+                {{ project_form.description }}
+                
+                <!-- Campo de Tags gerenciado pelo JavaScript -->
+                <label for="tags-input" class="form-label">Tags (máximo {{ project_form.MAX_TAGS }})</label>
+                <input type="text" id="tags-input" class="form-control" placeholder="Digite e pressione Enter para adicionar uma tag">
+                <div class="mt-2" id="tags-container"></div>
+                {{ project_form.tags }}
+
+                <!-- Linha Divisória (Estetíca)-->
+                <hr>
+            
+                {{ project_form.markdown_content.label_tag }}
+                {{ project_form.markdown_content }}
+                
                 <button type="submit" class="btn btn-success">Salvar Alterações</button>
             </form>
+            
         </div>
 
         <!-- Painel Lateral: Gerenciamento de Imagens -->
         <div class="col-md-4">
-            <h4>Imagens do Projeto</h4>
-            <ul class="list-group">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Imagens do Projeto</h4>
+                <!-- Botão para adicionar imagem -->
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addImageModal">
+                    <i class="fas fa-plus"></i> Adicionar Imagem
+                </button>
+            </div>
+
+            <!-- Galeria de imagens (2 por linha) -->
+            <div class="row mt-3">
                 {% for resource in project.resources.all %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <img src="{{ resource.file.url }}" class="img-thumbnail" alt="Imagem de recurso" style="width: 60px; height: 60px;">
-                    <div>
-                        <button class="btn btn-link" onclick="copyToClipboard('{{ resource.file.url }}')">Copiar URL</button>
-                        <form method="POST" action="{% url 'portfolio:delete_resource' project.portfolio.user.username project.name resource.id %}" class="d-inline-block">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta imagem?')">Excluir</button>
-                        </form>
+                <div class="col-6 mb-3">
+                    <div class="card">
+                        <img src="{{ resource.file.url }}" class="card-img-top img-thumbnail" alt="Imagem de recurso">
+                        <div class="card-body text-center">
+                            <button class="btn btn-link" onclick="copyToClipboard('{{ resource.file.url }}')">Copiar URL</button>
+                            <form method="POST" action="{% url 'portfolio:delete_resource' project.portfolio.user.username project.name resource.id %}" class="d-inline-block">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta imagem?')">Excluir</button>
+                            </form>
+                        </div>
                     </div>
-                </li>
+                </div>
                 {% empty %}
                 <p class="text-muted">Nenhuma imagem carregada.</p>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
+
     </div>
 </div>
+
 
 <!-- Modal para Visualizar a Imagem Atual -->
 <div class="modal fade" id="viewImageModal" tabindex="-1" aria-labelledby="viewImageModalLabel" aria-hidden="true">
@@ -70,23 +104,23 @@
     </div>
 </div>
 
-<!-- Modal para Editar/Adicionar Imagem -->
-<div class="modal fade" id="editImageModal" tabindex="-1" aria-labelledby="editImageModalLabel" aria-hidden="true">
+<!-- Modal para adicionar uma nova imagem -->
+<div class="modal fade" id="addImageModal" tabindex="-1" aria-labelledby="addImageModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editImageModalLabel">Enviar Nova Imagem</h5>
+                <h5 class="modal-title" id="addImageModalLabel">Adicionar Imagem</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" enctype="multipart/form-data" action="{% url 'portfolio:edit_project_image' project.portfolio.user.username project.name %}">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'portfolio:upload_img_project' project.portfolio.user.username project.name %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="img" class="form-label">Escolha uma nova imagem</label>
-                        <input type="file" name="img" class="form-control" id="img" accept="image/*">
+                        <label for="imageUpload" class="form-label">Escolher imagem</label>
+                        <input type="file" name="image" id="imageUpload" class="form-control" accept="image/*" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </form>
+                    <button type="submit" class="btn btn-primary">Adicionar Imagem</button>
+                </form>                
             </div>
         </div>
     </div>
@@ -103,5 +137,74 @@
         document.body.removeChild(tempInput);
         alert("URL copiada para o clipboard!");
     }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tagsInput = document.getElementById('tags-input');
+        const tagsContainer = document.getElementById('tags-container');
+        const tagsHiddenInput = document.getElementById('tags-hidden-input');
+        const tagLimitMessage = document.getElementById('tag-limit-message');
+        let tagsArray = [];
+        const MAX_TAGS = {{ form.MAX_TAGS|default:3 }};  // Limite de tags
+
+        function updateHiddenInput() {
+            tagsHiddenInput.value = tagsArray.join(',');
+        }
+
+        function createTagElement(tag) {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2';
+            badge.textContent = tag;
+
+            const removeButton = document.createElement('button');
+            removeButton.className = 'btn-close btn-close-white ms-1';
+            removeButton.setAttribute('type', 'button');
+            removeButton.addEventListener('click', function() {
+                tagsArray = tagsArray.filter(t => t !== tag);
+                tagsContainer.removeChild(badge);
+                updateHiddenInput();
+                if (tagsArray.length < MAX_TAGS) {
+                    tagsInput.disabled = false;
+                    tagLimitMessage.style.display = 'none';
+                }
+            });
+
+            badge.appendChild(removeButton);
+            tagsContainer.appendChild(badge);
+        }
+
+        tagsInput.addEventListener('keydown', function(event) {
+            if ((event.key === 'Enter' || event.key === ',') && tagsArray.length < MAX_TAGS) {
+                event.preventDefault();
+                const tag = tagsInput.value.trim();
+                if (tag && !tagsArray.includes(tag)) {
+                    tagsArray.push(tag);
+                    createTagElement(tag);
+                    updateHiddenInput();
+                    tagsInput.value = '';  // Limpa o input
+                }
+                if (tagsArray.length >= MAX_TAGS) {
+                    tagsInput.disabled = true;
+                    tagLimitMessage.style.display = 'block';
+                }
+            }
+        });
+
+        // Inicializa tags existentes (se houver no servidor)
+        const existingTags = "{{ project.tags.all|join:',' }}".split(',');
+        existingTags.forEach(tag => {
+            if (tag.trim()) {
+                tagsArray.push(tag.trim());
+                createTagElement(tag.trim());
+            }
+
+            // Desabilita o input se atingir o limite	
+            if (tagsArray.length >= MAX_TAGS) {
+                tagsInput.disabled = true;
+                tagLimitMessage.style.display = 'block';
+            }
+        });
+        updateHiddenInput();
+    });
 </script>
 {% endblock %}

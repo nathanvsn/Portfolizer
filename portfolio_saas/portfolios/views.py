@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Portfolio, Project
+from .models import Portfolio, Project, Resource
 from .forms import ProjectForm, ResourceUploadForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -68,7 +68,7 @@ def create_project(request, username):
         # Se o limite de projetos foi atingido, bloquear a criação
         if not can_create_more_projects:
             messages.error(request, 'Você atingiu o limite de projetos para o seu tipo de conta.')
-            return redirect('portfolio:user_portfolio', username=username)
+            return JsonResponse({'error': 'Limite de projetos atingido.'})
 
         # Processar o formulário de criação de projeto
         project_form = ProjectForm(request.POST, request.FILES, user=request.user)
@@ -93,28 +93,27 @@ def create_project(request, username):
         'can_create_more_projects': can_create_more_projects,  # Passa essa variável para o template
     })
 
+
 @login_required
 def edit_project(request, username, project_name):
     project = get_object_or_404(Project, portfolio__user__username=username, name=project_name)
 
-    # Apenas o proprietário pode editar o projeto
+    # Verifica se o usuário é o proprietário do projeto
     if request.user != project.portfolio.user:
+        messages.error(request, 'Você não tem permissão para editar este projeto.')
         return redirect('portfolio:user_portfolio', username=username)
 
-    # Tratamento para alteração da imagem do projeto
-    if request.method == 'POST' and 'img' in request.FILES:
-        project.img = request.FILES['img']
-        project.save()
-        messages.success(request, 'Imagem do projeto atualizada com sucesso!')
-        return redirect('portfolio:edit_project', username=username, project_name=project_name)
-
-    # Formulário para edição de informações do projeto
-    if request.method == 'POST' and 'project_form' in request.POST:
-        project_form = ProjectForm(request.POST, instance=project)
+    if request.method == 'POST':
+        project_form = ProjectForm(request.POST, request.FILES, instance=project)
+        
         if project_form.is_valid():
             project_form.save()
             messages.success(request, 'Projeto atualizado com sucesso!')
-            return redirect('portfolio:user_portfolio', username=username)
+            project_name = project_form.cleaned_data['name']
+            return redirect('portfolio:edit_project', username=username, project_name=project_name)
+        else:
+            print(project_form.errors)
+            messages.error(request, 'Erro ao atualizar o projeto. Verifique os dados e tente novamente.')
     else:
         project_form = ProjectForm(instance=project)
 
@@ -144,7 +143,6 @@ def edit_project_image(request, username, project_name):
 
     # Redireciona de volta para a página de edição do projeto
     return redirect('portfolio:edit_project', username=username, project_name=project_name)
-
 
 @login_required
 def delete_project(request, username, project_name):
@@ -180,3 +178,50 @@ def upload_resource(request, username, project_name):
         'resource_form': resource_form,
         'project': project,
     })
+
+@login_required
+def delete_resource(request, username, project_name, resource_id):
+    project = get_object_or_404(Project, portfolio__user__username=username, name=project_name)
+    resource = get_object_or_404(Resource, project=project, id=resource_id)
+
+    # Verifica se o usuário é o proprietário do projeto
+    if request.user != project.portfolio.user:
+        messages.error(request, 'Você não tem permissão para excluir este recurso.')
+        return redirect('portfolio:project_detail', username=username, project_name=project_name)
+
+    resource.delete()
+    messages.success(request, 'Recurso excluído com sucesso!')
+    return redirect('portfolio:project_detail', username=username, project_name=project_name)
+
+@login_required
+def upload_img_project(request, username, project_name):
+    project = get_object_or_404(Project, portfolio__user__username=username, name=project_name)
+
+    if not project.can_upload_more_images:
+        messages.error(request, 'Você atingiu o limite de imagens permitidas para o seu tipo de conta.')
+        return redirect('portfolio:project_detail', username=username, project_name=project_name)
+
+    if request.method == 'POST':
+        img = request.FILES.get('image')  # Pegando a imagem do formulário
+        
+        if img:
+            file_size = img.size  # Tamanho do arquivo
+            file_type = img.content_type  # Tipo de conteúdo (ex: image/jpeg)
+
+            # Verifica se o tamanho do arquivo ultrapassa o limite de 100MB para usuários Ultra
+            if not project.can_upload_more_resources:
+                messages.error(request, 'Você excedeu o limite de armazenamento do projeto.')
+                return redirect('portfolio:project_detail', username=username, project_name=project_name)
+
+            # Salvando a imagem como um recurso
+            resource = Resource.objects.create(
+                project=project,
+                file=img,
+                file_type=file_type,
+                file_size=file_size
+            )
+            messages.success(request, 'Imagem adicionada com sucesso!')
+        else:
+            messages.error(request, 'Erro ao adicionar a imagem. Por favor, tente novamente.')
+
+    return redirect('portfolio:project_detail', username=username, project_name=project_name)

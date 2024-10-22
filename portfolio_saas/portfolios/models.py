@@ -1,5 +1,6 @@
 from django.db import models
 from custom_auth.models import User
+from taggit.managers import TaggableManager
 
 class Portfolio(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='portfolio')
@@ -32,8 +33,10 @@ class Portfolio(models.Model):
 class Project(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='projects')
     name = models.CharField(max_length=255)
+    description = models.TextField(max_length=400, blank=True, null=True)
     img = models.ImageField(upload_to='project_images/', blank=True, null=True)
-    markdown_content = models.TextField(blank=True)  # Markdown para descrição de projeto
+    tags =TaggableManager()
+    markdown_content = models.TextField(blank=True)
     html_content = models.TextField(blank=True)
     css_content = models.TextField(blank=True)
     js_content = models.TextField(blank=True)
@@ -69,6 +72,7 @@ class Project(models.Model):
 class Resource(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resources')
     file = models.FileField(upload_to='project_resources/')
+    file_type = models.CharField(max_length=20)  # Tipo do arquivo (ex: image/png, application/pdf)
     file_size = models.PositiveIntegerField()  # Armazenar o tamanho do arquivo em bytes
 
     def __str__(self):
