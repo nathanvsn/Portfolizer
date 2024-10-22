@@ -8,8 +8,201 @@
     
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ project_form.as_p }}
-        <button type="submit" class="btn btn-success">Criar Projeto</button>
+        
+        <!-- Nome do Projeto -->
+        {{ project_form.name.label_tag }}
+        {{ project_form.name }}
+
+        <!-- Descrição do Projeto -->
+        {{ project_form.description.label_tag }}
+        {{ project_form.description }}
+
+        <!-- Tags -->
+        <label for="tags-input" class="form-label">Tags (máximo {{ project_form.MAX_TAGS }})</label>
+        <input type="text" id="tags-input" class="form-control" placeholder="Digite e pressione Enter para adicionar uma tag">
+        <div class="mt-2" id="tags-container"></div>
+        {{ project_form.tags }}
+        
+        <!-- Linha Divisória -->
+        <hr>
+
+        <!-- Conteúdo Markdown -->
+        {{ project_form.markdown_content.label_tag }}
+        {{ project_form.markdown_content }}
+
+        <hr>
+
+        <!-- Galeria de Imagens com botão de adicionar -->
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>Imagens do Projeto</h4>
+            <!-- Botão para abrir modal e adicionar imagem -->
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addImageModal">
+                <i class="fas fa-plus"></i> Adicionar Imagem
+            </button>
+        </div>
+
+        <!-- Galeria de Imagens (2 por linha) -->
+        <div class="row mt-3" id="image-gallery">
+            <!-- Imagens que serão carregadas aparecerão aqui -->
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Criar Projeto</button>
     </form>
 </div>
+
+<!-- Modal para adicionar imagem -->
+<div class="modal fade" id="addImageModal" tabindex="-1" aria-labelledby="addImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addImageModalLabel">Adicionar Imagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="image-upload-form">
+                    <div class="mb-3">
+                        <label for="project-images" class="form-label">Selecione Imagens</label>
+                        <input type="file" name="project_images" id="project-images" class="form-control" multiple>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="upload-images-btn">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tagsInput = document.getElementById('tags-input');
+        const tagsContainer = document.getElementById('tags-container');
+        const tagsHiddenInput = document.getElementById('tags-hidden-input');
+        const tagLimitMessage = document.getElementById('tag-limit-message');
+        let tagsArray = [];
+        const MAX_TAGS = {{ project_form.MAX_TAGS|default:3 }};  // Limite de tags
+
+        function updateHiddenInput() {
+            tagsHiddenInput.value = tagsArray.join(',');
+        }
+
+        function createTagElement(tag) {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2';
+            badge.textContent = tag;
+
+            const removeButton = document.createElement('button');
+            removeButton.className = 'btn-close btn-close-white ms-1';
+            removeButton.setAttribute('type', 'button');
+            removeButton.addEventListener('click', function() {
+                tagsArray = tagsArray.filter(t => t !== tag);
+                tagsContainer.removeChild(badge);
+                updateHiddenInput();
+                if (tagsArray.length < MAX_TAGS) {
+                    tagsInput.disabled = false;
+                    tagLimitMessage.style.display = 'none';
+                }
+            });
+
+            badge.appendChild(removeButton);
+            tagsContainer.appendChild(badge);
+        }
+
+        tagsInput.addEventListener('keydown', function(event) {
+            if ((event.key === 'Enter' || event.key === ',') && tagsArray.length < MAX_TAGS) {
+                event.preventDefault();
+                const tag = tagsInput.value.trim();
+                if (tag && !tagsArray.includes(tag)) {
+                    tagsArray.push(tag);
+                    createTagElement(tag);
+                    updateHiddenInput();
+                    tagsInput.value = '';  // Limpa o input
+                }
+                if (tagsArray.length >= MAX_TAGS) {
+                    tagsInput.disabled = true;
+                    tagLimitMessage.style.display = 'block';
+                }
+            }
+        });
+        updateHiddenInput();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('project-images');
+        const imageGallery = document.getElementById('image-gallery');
+        const uploadButton = document.getElementById('upload-images-btn');
+
+        // Armazena as imagens carregadas pelo usuário
+        let uploadedImages = [];
+
+        // Ao clicar em "Upload", processa e exibe as imagens
+        uploadButton.addEventListener('click', function() {
+            const files = imageInput.files;
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    uploadedImages.push(file);
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const imageHtml = `
+                            <div class="col-6 mb-3">
+                                <div class="card">
+                                    <img src="${e.target.result}" class="card-img-top img-thumbnail" alt="Imagem de recurso">
+                                    <div class="card-body text-center">
+                                        <button class="btn btn-danger btn-sm remove-image-btn">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        imageGallery.innerHTML += imageHtml;
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+
+                // Limpar o input
+                imageInput.value = '';
+                // Fechar o modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addImageModal'));
+                modal.hide();
+            }
+        });
+
+        // Listener para remover imagens
+        imageGallery.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-image-btn')) {
+                const card = e.target.closest('.col-6');
+                const index = Array.from(imageGallery.children).indexOf(card);
+                uploadedImages.splice(index, 1); // Remove do array
+                card.remove(); // Remove da galeria
+            }
+        });
+
+        // Adiciona as imagens carregadas ao formulário de criação de projeto
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const formData = new FormData(form);
+            uploadedImages.forEach((file, index) => {
+                formData.append(`project_images_${index}`, file); // Adiciona as imagens ao FormData
+            });
+        });
+    });
+</script>
+<script>
+// Função para copiar a referência temporária para o clipboard
+let imageCounter = 1;  // Contador para criar referências temporárias
+
+function copyToMarkdown() {
+    const markdownEditor = document.getElementById('markdown');  // O editor de markdown
+    const tempRef = `img${imageCounter}`;  // Cria uma referência temporária como img1, img2, etc.
+    
+    // Insere a referência no editor de Markdown
+    markdownEditor.value += `![${tempRef}](#)`;
+    
+    // Atualiza o contador para a próxima imagem
+    imageCounter++;
+
+    alert("Referência de imagem adicionada ao Markdown!");
+}
+</script>
 {% endblock %}

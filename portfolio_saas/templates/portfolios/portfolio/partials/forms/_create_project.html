@@ -6,7 +6,7 @@
         <!-- Formulário de criação de projeto -->
         <form method="POST" enctype="multipart/form-data" action="{% url 'portfolio:create_project' user.username %}">
             {% csrf_token %}
-            {{ project_form.as_p }}  <!-- Renderiza os campos do formulário dinamicamente -->
+            {{ project_form.as_p }}
             <button type="submit" class="btn btn-success">Criar Projeto</button>
         </form>
     {% else %}

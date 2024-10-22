@@ -78,6 +78,22 @@ def create_project(request, username):
             project.portfolio = portfolio
             project.save()
             
+            # Processar as imagens opcionais (upload)
+            for key in request.FILES:
+                if key.startswith('project_images_'):  # Processa imagens com nome dinâmico
+                    image = request.FILES[key]
+                    if not project.can_upload_more_images:
+                        messages.error(request, f'Você atingiu o limite de uploads de imagens para o projeto.')
+                        return redirect('portfolio:create_project', username=username)
+                    
+                    resource = Resource(
+                        project=project,
+                        file=image,
+                        file_type=image.content_type,
+                        file_size=image.size
+                    )
+                    resource.save()
+            
             messages.success(request, 'Projeto criado com sucesso!')
             return redirect('portfolio:user_portfolio', username=username)
         else:
@@ -87,7 +103,6 @@ def create_project(request, username):
         # Exibir o formulário normalmente
         project_form = ProjectForm(user=request.user)
 
-    # Renderizar a página com o formulário e a verificação do limite de projetos
     return render(request, 'portfolios/portfolio/create_project.html', {
         'project_form': project_form,
         'can_create_more_projects': can_create_more_projects,  # Passa essa variável para o template
@@ -137,12 +152,11 @@ def edit_project_image(request, username, project_name):
     if request.method == 'POST' and 'img' in request.FILES:
         project.img = request.FILES['img']  # Atualiza a imagem do projeto
         project.save()  # Salva a nova imagem no banco de dados
-        messages.success(request, 'Imagem do projeto atualizada com sucesso!')
     else:
-        messages.error(request, 'Erro ao atualizar a imagem. Por favor, tente novamente.')
+        return JsonResponse({'error': 'Nenhuma imagem enviada.'})
 
     # Redireciona de volta para a página de edição do projeto
-    return redirect('portfolio:edit_project', username=username, project_name=project_name)
+    return JsonResponse({'success': True})
 
 @login_required
 def delete_project(request, username, project_name):
@@ -153,7 +167,7 @@ def delete_project(request, username, project_name):
         project.delete()
         messages.success(request, 'Projeto excluído com sucesso!')
     
-    return redirect('portfolio:user_portfolio', username=username)
+    return JsonResponse({'success': True})
 
 @login_required
 def upload_resource(request, username, project_name):
@@ -191,7 +205,7 @@ def delete_resource(request, username, project_name, resource_id):
 
     resource.delete()
     messages.success(request, 'Recurso excluído com sucesso!')
-    return redirect('portfolio:project_detail', username=username, project_name=project_name)
+    return JsonResponse({'success': True})
 
 @login_required
 def upload_img_project(request, username, project_name):
@@ -199,7 +213,7 @@ def upload_img_project(request, username, project_name):
 
     if not project.can_upload_more_images:
         messages.error(request, 'Você atingiu o limite de imagens permitidas para o seu tipo de conta.')
-        return redirect('portfolio:project_detail', username=username, project_name=project_name)
+        return JsonResponse({'error': 'Limite de imagens atingido.'})
 
     if request.method == 'POST':
         img = request.FILES.get('image')  # Pegando a imagem do formulário
@@ -211,7 +225,7 @@ def upload_img_project(request, username, project_name):
             # Verifica se o tamanho do arquivo ultrapassa o limite de 100MB para usuários Ultra
             if not project.can_upload_more_resources:
                 messages.error(request, 'Você excedeu o limite de armazenamento do projeto.')
-                return redirect('portfolio:project_detail', username=username, project_name=project_name)
+                return JsonResponse({'error': 'Limite de armazenamento excedido.'})
 
             # Salvando a imagem como um recurso
             resource = Resource.objects.create(
@@ -224,4 +238,4 @@ def upload_img_project(request, username, project_name):
         else:
             messages.error(request, 'Erro ao adicionar a imagem. Por favor, tente novamente.')
 
-    return redirect('portfolio:project_detail', username=username, project_name=project_name)
+    return JsonResponse({'success': True})

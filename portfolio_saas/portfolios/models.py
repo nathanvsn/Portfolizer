@@ -85,7 +85,7 @@ class Resource(models.Model):
     @property
     def can_upload_more(self):
         user_type = self.project.portfolio.user.profile.user_type
-        if user_type == 'free' and self.total_storage_used < 100 * 1024 * 1024:  # Limite de 100 MB
+        if user_type == 'free' and self.total_storage_used < 1000 * 1024 * 1024:  # Limite de 1 GB
             return True
         elif user_type == 'pro' or user_type == 'ultra':  # Pro e Ultra têm limites maiores ou infinitos
             return True

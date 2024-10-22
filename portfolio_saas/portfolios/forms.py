@@ -29,12 +29,13 @@ class ProjectForm(forms.ModelForm):
 
     def clean_tags(self):
         tags = self.cleaned_data['tags']
-
+        
         # Verifica se o número de tags excede o limite
         if len(tags) > self.MAX_TAGS:
             raise forms.ValidationError(f'Você pode adicionar no máximo {self.MAX_TAGS} tags.')
 
-        return tags  # Retorna a lista diretamente, sem usar 'split'
+        return tags
+
 
 
     def save(self, commit=True):
@@ -47,6 +48,7 @@ class ProjectForm(forms.ModelForm):
             project.css_content = self.cleaned_data['css_content']
         if 'js_content' in self.cleaned_data:
             project.js_content = self.cleaned_data['js_content']
+            
 
         if commit:
             project.save()
