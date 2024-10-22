@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfólio de {{ portfolio.user.username }}{% endblock %}
+{% block imports %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        marked.setOptions({
+            sanitize: true,
+        });
+
+        const rawMarkdown = document.getElementById('raw-markdown').value;
+        const htmlContent = marked.parse(rawMarkdown);
+        document.getElementById('markdown-content').innerHTML = htmlContent;
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs" id="portfolioTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Página Inicial</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab" aria-controls="projects" aria-selected="false">Projetos</button>
+        </li>
+        {% if user == portfolio.user %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">Estatísticas</button>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="tab-content mt-3" id="portfolioTabsContent">
+        <!-- Tab de Página Inicial -->
+        {% include 'portfolios/portfolio/partials/user_portfolio/_pagina_inicial.html' %}
+        
+        <!-- Tab de Projetos -->
+        {% include 'portfolios/portfolio/partials/user_portfolio/_projetos.html' %}
+        
+        <!-- Tab de Estatísticas -->
+        {% include 'portfolios/portfolio/partials/user_portfolio/_estatisticas.html' %}
+    </div>
+</div>
+{% endblock %}

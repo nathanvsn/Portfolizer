@@ -18,12 +18,23 @@ class Portfolio(models.Model):
     @property
     def is_ultra(self):
         return self.user.profile.user_type == 'ultra'
+    
+    @property
+    def can_create_more_projects(self):
+        user_type = self.user.profile.user_type
+        if user_type == 'free':
+            return self.projects.count() < 2
+        elif user_type == 'pro':
+            return self.projects.count() < 10
+        else:
+            return True
 
 class Project(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='projects')
     name = models.CharField(max_length=255)
+    img = models.ImageField(upload_to='project_images/', blank=True, null=True)
     markdown_content = models.TextField(blank=True)  # Markdown para descrição de projeto
-    html_content = models.TextField(blank=True)  # Para usuários Ultra que podem usar HTML
+    html_content = models.TextField(blank=True)
     css_content = models.TextField(blank=True)
     js_content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

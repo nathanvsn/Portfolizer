@@ -27,6 +27,10 @@ class User(AbstractUser):
     @property
     def is_pro(self):
         return self.profile.is_pro  # Acessando o perfil para verificar o tipo de usuário
+    
+    @property
+    def is_ultra(self):
+        return self.profile.is_ultra  # Acessando o perfil para verificar o tipo de usuário
 
     def __str__(self):
         return self.username
@@ -47,3 +51,16 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_user_type_display()}"
+    
+    # Propriedades para facilitar o acesso ao tipo de usuário
+    @property
+    def is_free(self):
+        return self.user_type == self.FREE
+
+    @property
+    def is_pro(self):
+        return self.user_type == self.PRO
+
+    @property
+    def is_ultra(self):
+        return self.user_type == self.ULTRA

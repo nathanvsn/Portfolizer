@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Projeto: {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Coluna Principal: Edição do Projeto -->
+        <div class="col-md-8">
+            <h2>Editar Projeto: {{ project.name }}</h2>
+
+            <!-- Exibição da Imagem Atual do Projeto -->
+            <div class="current-image">
+                <h4>Imagem Atual</h4>
+                {% if project.img %}
+                <img src="{{ project.img.url }}" class="img-fluid mb-3" alt="Imagem do projeto {{ project.name }}" style="max-width: 100%;">
+                <div class="d-flex justify-content-start">
+                    <button class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#viewImageModal">Ver Imagem</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editImageModal">Trocar Imagem</button>
+                </div>
+                {% else %}
+                <p>Nenhuma imagem disponível.</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editImageModal">Adicionar Imagem</button>
+                {% endif %}
+            </div>
+
+            <!-- Formulário de Edição -->
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ project_form.as_p }}
+                <button type="submit" class="btn btn-success">Salvar Alterações</button>
+            </form>
+        </div>
+
+        <!-- Painel Lateral: Gerenciamento de Imagens -->
+        <div class="col-md-4">
+            <h4>Imagens do Projeto</h4>
+            <ul class="list-group">
+                {% for resource in project.resources.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <img src="{{ resource.file.url }}" class="img-thumbnail" alt="Imagem de recurso" style="width: 60px; height: 60px;">
+                    <div>
+                        <button class="btn btn-link" onclick="copyToClipboard('{{ resource.file.url }}')">Copiar URL</button>
+                        <form method="POST" action="{% url 'portfolio:delete_resource' project.portfolio.user.username project.name resource.id %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta imagem?')">Excluir</button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <p class="text-muted">Nenhuma imagem carregada.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Visualizar a Imagem Atual -->
+<div class="modal fade" id="viewImageModal" tabindex="-1" aria-labelledby="viewImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewImageModalLabel">Imagem Atual</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img src="{{ project.img.url }}" class="img-fluid" alt="Imagem do projeto {{ project.name }}">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar/Adicionar Imagem -->
+<div class="modal fade" id="editImageModal" tabindex="-1" aria-labelledby="editImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editImageModalLabel">Enviar Nova Imagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'portfolio:edit_project_image' project.portfolio.user.username project.name %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="img" class="form-label">Escolha uma nova imagem</label>
+                        <input type="file" name="img" class="form-control" id="img" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para copiar a URL da imagem para o clipboard
+    function copyToClipboard(text) {
+        const tempInput = document.createElement("input");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        alert("URL copiada para o clipboard!");
+    }
+</script>
+{% endblock %}

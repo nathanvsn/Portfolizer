@@ -1,0 +1,49 @@
+
+<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <!-- Ícone de Engrenagem para abrir o modal de edição -->
+    {% if user == portfolio.user %}
+    <div class="d-flex align-items-center justify-content-between mt-4">
+        <h4></h4>
+        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editPageModal">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="content">
+        <!-- Exibe o conteúdo markdown renderizado -->
+        <div id="markdown-content"></div>
+        <textarea id="raw-markdown" style="display:none;">{{ portfolio.markdown_content }}</textarea>
+    </div>
+</div>
+
+<!-- Modal para Edição da Página Inicial -->
+<div class="modal fade" id="editPageModal" tabindex="-1" aria-labelledby="editPageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPageModalLabel">Editar Página Inicial</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="markdown">Conteúdo Markdown</label>
+                        <textarea id="markdown" name="markdown_content" class="form-control" rows="10">{{ portfolio.markdown_content }}</textarea>
+                    </div>
+                    {% if user.is_ultra %}
+                    <div class="form-group mb-3">
+                        <label for="html_upload">Upload HTML/CSS/JS (Ultra)</label>
+                        <input type="file" class="form-control" name="html_upload">
+                    </div>
+                    {% endif %}
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

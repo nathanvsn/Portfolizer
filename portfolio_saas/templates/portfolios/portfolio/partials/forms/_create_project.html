@@ -1,0 +1,17 @@
+<div class="mt-4">
+    <h5>Criar Novo Projeto</h5>
+    
+    <!-- Verifica se o usuário pode criar mais projetos -->
+    {% if can_create_more_projects %}
+        <!-- Formulário de criação de projeto -->
+        <form method="POST" enctype="multipart/form-data" action="{% url 'portfolio:create_project' user.username %}">
+            {% csrf_token %}
+            {{ project_form.as_p }}  <!-- Renderiza os campos do formulário dinamicamente -->
+            <button type="submit" class="btn btn-success">Criar Projeto</button>
+        </form>
+    {% else %}
+        <!-- Exibe mensagem e desabilita o botão -->
+        <p class="text-danger">Você atingiu o limite de projetos para o seu tipo de conta.</p>
+        <button class="btn btn-success" disabled>Criar Projeto</button>
+    {% endif %}
+</div>

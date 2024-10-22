@@ -1,0 +1,40 @@
+{% load static %}
+<ul class="navbar-nav ms-auto">
+    {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="rounded-circle" width="30" height="30" alt="Foto de {{ user.username }}">
+                {% else %}
+                    <img src="{% static 'images/default_profile.png' %}" class="rounded-circle" width="30" height="30" alt="Foto padrão">
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <li><a class="dropdown-item" href="{% url 'portfolio:user_portfolio' user.username %}">Meu Portfolio</a></li>
+                <li><a class="dropdown-item" href="{% url 'users:settings' %}">Configurações</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="POST" action="{% url 'users:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">Logout</button>
+                    </form>
+                </li>
+                {% if user.is_superuser %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                {% endif %}
+
+            </ul>
+        </li>
+    {% else %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{% static 'images/default_profile.png' %}" class="rounded-circle" width="30" height="30" alt="Foto padrão">
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <li><a class="dropdown-item" href="{% url 'users:login' %}">Login</a></li>
+                <li><a class="dropdown-item" href="{% url 'users:register' %}">Registrar</a></li>
+            </ul>
+        </li>
+    {% endif %}
+</ul>

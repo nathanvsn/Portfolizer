@@ -1,0 +1,86 @@
+<div class="tab-pane fade" id="projects" role="tabpanel" aria-labelledby="projects-tab">
+    
+    <!-- Verifica se o usuário possui projetos -->
+    {% if projects %}
+    <h4>Meus Projetos</h4>
+
+    <ul class="list-group">
+        {% for project in projects %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <!-- Exibe a foto do projeto -->
+            {% if project.img %}
+            <img src="{{ project.img.url }}" class="img-thumbnail" alt="Imagem do projeto {{ project.name }}" style="width: 100px; height: 100px;">
+            {% endif %}
+
+            <div>
+                <a href="#" class="project-link" data-bs-toggle="modal" data-bs-target="#projectModal" data-project-name="{{ project.name }}" data-username="{{ portfolio.user.username }}">
+                    <strong>{{ project.name }}</strong>
+                </a>
+                <small class="text-muted">Criado em: {{ project.created_at|date:"d/m/Y" }}</small>
+            </div>
+            
+            <!-- Se o usuário é o proprietário, exibe os botões de edição e exclusão -->
+            {% if user == portfolio.user %}
+            <div>
+                <a href="{% url 'portfolio:edit_project' portfolio.user.username project.name %}" class="btn btn-sm btn-warning">Editar</a>
+                <form method="POST" action="{% url 'portfolio:delete_project' portfolio.user.username project.name %}" class="d-inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Você tem certeza que deseja excluir este projeto?')">Excluir</button>
+                </form>
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mt-3">Nenhum projeto criado ainda.</p>
+    {% endif %}
+
+    <!-- Formulário de criação de projeto (somente para o proprietário) -->
+    {% if user == portfolio.user %}
+        {% include 'portfolios/portfolio/partials/forms/_create_project.html' %}
+    {% endif %}
+</div>
+
+<!-- Modal para visualização do projeto -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectModalLabel">Título do Projeto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="markdown-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para carregar o projeto via AJAX -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const projectModal = document.getElementById('projectModal');
+        const projectModalLabel = projectModal.querySelector('.modal-title');
+        const markdownContent = projectModal.querySelector('#markdown-content');
+        
+        document.querySelectorAll('.project-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                const projectName = this.getAttribute('data-project-name');
+                const username = this.getAttribute('data-username');
+                
+                // Faz a requisição AJAX para buscar os dados do projeto
+                fetch(`/portfolio/project/${username}/${projectName}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Atualiza o conteúdo do modal
+                        projectModalLabel.textContent = data.name;
+                        
+                        const htmlContent = marked.parse(data.markdown_content);
+                        markdownContent.innerHTML = htmlContent;
+                    })
+                    .catch(error => console.error('Erro ao carregar o projeto:', error));
+            });
+        });
+    });
+</script>
