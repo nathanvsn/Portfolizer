@@ -1,4 +1,5 @@
 {% load static %}
+{% load hosts %}
 <ul class="navbar-nav ms-auto">
     {% if user.is_authenticated %}
         <li class="nav-item dropdown">
@@ -21,7 +22,7 @@
                 </li>
                 {% if user.is_superuser %}
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                    <li><a class="dropdown-item" href="{% host_url 'admin:index' host 'admin' %}">Admin</a></li>
                 {% endif %}
 
             </ul>

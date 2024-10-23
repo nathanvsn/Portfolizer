@@ -30,6 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['.portfolizer.com.br', 'portfolizer.com.br']
 
 ROOT_HOSTCONF = 'core.hosts'
+PARENT_HOST = 'portfolizer.com.br'
 DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'core.urls'
 SESSION_COOKIE_DOMAIN = None
@@ -50,10 +51,13 @@ INSTALLED_APPS = [
     
     # Third-party
     'taggit',
-    # 'django_hosts',
+    'django_hosts',
+    'django_extensions',
 ]
 
+
 MIDDLEWARE = [
+    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -94,6 +98,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Caminho onde os arquivos serão coletados
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

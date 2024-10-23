@@ -44,7 +44,12 @@ class SubdomainRouterMiddleware:
         if getattr(request, 'is_subdomain', False):
             # Adiciona as rotas do subdomínio, sem sobrescrever as rotas principais
             print('Subdomínio detectado')
-            request.urlconf = 'portfolios.ultra.urls'  # Adiciona as rotas específicas do subdomínio
+            
+            # Verifica se é admin
+            if request.subdomain == 'admin':
+                request.urlconf = 'core.urls_admin'
+            else:
+                request.urlconf = 'portfolios.ultra.urls'  # Adiciona as rotas específicas do subdomínio
         else:
             # Mantém o conjunto completo de rotas do domínio principal
             print('Domínio principal detectado')
@@ -60,12 +65,19 @@ class SubdomainSecurityMiddleware:
     def __call__(self, request):
         # Captura o subdomínio
         sld, subdomain_parts = get_subdomain_from_request(request)
+
+        # Liberar o subdomínio 'admin' da validação
+        if len(subdomain_parts) > 0 and subdomain_parts[0] == 'admin':
+            print('Acesso ao admin liberado')
+            return self.get_response(request)
+
         if len(subdomain_parts) > 0:
             # Verificar se o usuário existe
             try:
                 user = User.objects.get(username=subdomain_parts[-1])
             except User.DoesNotExist:
-                raise Http404("Usuário não encontrado.")
+                # Redirecionar para a página de erro 404
+                raise Http404('Usuário não encontrado')
 
             # Verificar se o usuário realmente é "Ultra"
             if user.profile.user_type != 'ultra':
