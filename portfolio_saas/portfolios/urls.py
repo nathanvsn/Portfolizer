@@ -18,6 +18,8 @@ urlpatterns = [
     path('<str:username>/<str:project_name>/', views.project_detail, name='project_detail'),
     path('<str:username>/<str:project_name>/edit/', views.edit_project, name='edit_project'),
     path('project/<str:username>/<str:project_name>/edit-image/', views.edit_project_image, name='edit_project_image'),
+    
+    path('vote/<str:username>/<str:project_name>/', views.vote_project, name='vote_project'),
 
     path('<str:username>/<str:project_name>/delete/', views.delete_project, name='delete_project'),
     

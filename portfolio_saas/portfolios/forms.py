@@ -12,8 +12,7 @@ class ProjectForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do Projeto'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Descrição curta do Projeto', 'maxlength': 400}),
-            # O campo de tags deve ter um placeholder claro e ser gerido via JavaScript
-            'tags': forms.HiddenInput(),  # Usamos HiddenInput porque vamos gerenciar via JavaScript
+            'tags': forms.HiddenInput(attrs={'required': False}),
             'img': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'markdown_content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Projeto em Markdown'}),
         }

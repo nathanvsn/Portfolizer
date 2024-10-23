@@ -1,6 +1,7 @@
 from django.db import models
 from custom_auth.models import User
 from taggit.managers import TaggableManager
+from django.db import transaction
 
 class Portfolio(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='portfolio')
@@ -35,7 +36,8 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(max_length=400, blank=True, null=True)
     img = models.ImageField(upload_to='project_images/', blank=True, null=True)
-    tags =TaggableManager()
+    votes = models.IntegerField(default=0)
+    tags =TaggableManager(blank = True)
     markdown_content = models.TextField(blank=True)
     html_content = models.TextField(blank=True)
     css_content = models.TextField(blank=True)
@@ -68,7 +70,22 @@ class Project(models.Model):
         elif user_type == 'pro' or user_type == 'free':  # Ajustar limites para cada tipo
             return True
         return False
-        
+    
+    def user_has_voted(self, user):
+        """Verifica se o usuário já votou neste projeto."""
+        return self.user_votes.filter(user=user).exists()
+    
+    def add_vote(self):
+        with transaction.atomic():
+            self.votes += 1
+            self.save()
+
+    def remove_vote(self):
+        with transaction.atomic():
+            if self.votes > 0:
+                self.votes -= 1
+            self.save()
+
 class Resource(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resources')
     file = models.FileField(upload_to='project_resources/')
@@ -91,3 +108,10 @@ class Resource(models.Model):
             return True
         return False
 
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="user_votes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'project')

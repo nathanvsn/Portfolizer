@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     # Apps
     'portfolios',
     'custom_auth',
-    'pages', # App para páginas padrão
+    'pages',
     
-    # Django-taggit
+    # Third-party
     'taggit',
 ]
 

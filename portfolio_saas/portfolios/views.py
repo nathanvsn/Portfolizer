@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Portfolio, Project, Resource
+from .models import Portfolio, Project, Resource, Vote
 from .forms import ProjectForm, ResourceUploadForm
 from django.contrib import messages
 from django.http import JsonResponse
@@ -12,6 +12,10 @@ def user_portfolio(request, username):
     user = get_object_or_404(User, username=username)
     portfolio = user.portfolio
     projects = portfolio.projects.all()
+
+    # Verificar se o usuário logado já votou em cada projeto
+    for project in projects:
+        project.user_has_voted = project.user_has_voted(request.user) if request.user.is_authenticated else False
 
     # Lógica para salvar o conteúdo markdown
     if request.method == 'POST' and request.user == user:
@@ -35,9 +39,16 @@ def project_detail(request, username, project_name):
         template = 'portfolios/portfolio/ultra_project_detail.html'
     else:
         template = 'portfolios/portfolio/project_detail.html'
+        
+    # Verifica se o usuário já votou no projeto
+    user_has_voted = False
+    if request.user.is_authenticated:
+        user_has_voted = Vote.objects.filter(user=request.user, project=project).exists()
+
 
     context = {
         'project': project,
+        'user_has_voted': user_has_voted,
     }
     return render(request, template, context)
 
@@ -107,6 +118,24 @@ def create_project(request, username):
         'project_form': project_form,
         'can_create_more_projects': can_create_more_projects,  # Passa essa variável para o template
     })
+
+
+@login_required()
+def vote_project(request, username, project_name):
+    project = get_object_or_404(Project, portfolio__user__username=username, name=project_name)
+    
+    # Verifica se o usuário já votou no projeto
+    vote, created = Vote.objects.get_or_create(user=request.user, project=project)
+
+    if created:
+        print('Voto adicionado!')
+        project.add_vote()
+    else:
+        print('Voto removido!')
+        vote.delete()
+        project.remove_vote() 
+    
+    return JsonResponse({'success': created})
 
 
 @login_required

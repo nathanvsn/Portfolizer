@@ -3,6 +3,9 @@
 {% block title %}Portfólio de {{ portfolio.user.username }}{% endblock %}
 {% block imports %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% endblock %}
 
 {% block js %}
@@ -18,6 +21,44 @@
         document.getElementById('markdown-content').innerHTML = htmlContent;
     });
 </script>
+{% endblock %}
+
+{% block style %}
+<style>
+    .vote-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.3s ease; /* Animação de clique e hover */
+    }
+    
+    .vote-button:hover {
+        transform: scale(1.1); /* Aumenta o botão no hover */
+    }
+    
+    .vote-button:active {
+        transform: scale(1.2); /* Aumenta ainda mais quando clicado */
+    }
+    
+    .vote-button svg {
+        width: 50px;
+        height: 50px;
+        transition: fill 0.3s ease, transform 0.3s ease; /* Transições suaves para cor e escala */
+    }
+    
+    .vote-button svg path {
+        transition: fill 0.3s ease; /* Animação de cor suave */
+    }
+    
+    .vote-button.voted svg {
+        fill: #ff6d00; /* Cor do fogo aceso quando votado */
+    }
+    
+    .vote-button.unvoted svg {
+        fill: #000; /* Cor quando não votado (fogo apagado) */
+    }    
+</style>
 {% endblock %}
 
 {% block content %}

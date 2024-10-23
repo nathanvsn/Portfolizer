@@ -5,6 +5,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
+
+
 {% block content %}
 <div class="container mt-5">
     <div class="row">
@@ -23,13 +25,16 @@
                 </div>
                 {% else %}
                 <p>Nenhuma imagem disponível.</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editImageModal">Adicionar Imagem</button>
                 {% endif %}
             </div>
 
             <!-- Formulário de Edição (agora com o ProjectForm) -->
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
+
+                <!-- Campo de Imagem -->
+                {{ project_form.img.label_tag }}
+                {{ project_form.img }}
                 
                 {{ project_form.name.label_tag }}
                 {{ project_form.name }}
@@ -107,7 +112,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img src="{{ project.img.url }}" class="img-fluid" alt="Imagem do projeto {{ project.name }}">
+                {% if project.img %}
+                    <img src="{{ project.img.url }}" class="img-fluid" alt="Imagem do projeto {{ project.name }}">
+                {% else %}
+                    <p>Nenhuma imagem disponível.</p>
+                {% endif %}
             </div>
         </div>
     </div>
