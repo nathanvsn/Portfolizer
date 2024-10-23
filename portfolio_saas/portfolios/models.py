@@ -25,9 +25,9 @@ class Portfolio(models.Model):
     def can_create_more_projects(self):
         user_type = self.user.profile.user_type
         if user_type == 'free':
-            return self.projects.count() < 2
+            return self.projects.count() < 5
         elif user_type == 'pro':
-            return self.projects.count() < 10
+            return self.projects.count() < 15
         else:
             return True
 
@@ -51,7 +51,7 @@ class Project(models.Model):
     def can_upload_more_images(self):
         user_type = self.portfolio.user.profile.user_type
         if user_type == 'free':
-            return self.resources.count() < 2
+            return self.resources.count() < 3
         elif user_type == 'pro':
             return self.resources.count() < 10
         else:
@@ -65,10 +65,10 @@ class Project(models.Model):
         user_type = self.portfolio.user.profile.user_type
         total_used = self.total_storage_used()
         
-        if user_type == 'ultra' and total_used < 100 * 1024 * 1024:
+        if user_type == 'ultra' and total_used < 1000 * 1024 * 1024:
             return True
-        elif user_type == 'pro' or user_type == 'free':  # Ajustar limites para cada tipo
-            return True
+        elif user_type == 'pro' or user_type == 'free':
+            return False
         return False
     
     def user_has_voted(self, user):
@@ -98,15 +98,6 @@ class Resource(models.Model):
     @property
     def total_storage_used(self):
         return sum(resource.file_size for resource in self.project.resources.all())
-    
-    @property
-    def can_upload_more(self):
-        user_type = self.project.portfolio.user.profile.user_type
-        if user_type == 'free' and self.total_storage_used < 1000 * 1024 * 1024:  # Limite de 1 GB
-            return True
-        elif user_type == 'pro' or user_type == 'ultra':  # Pro e Ultra têm limites maiores ou infinitos
-            return True
-        return False
 
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

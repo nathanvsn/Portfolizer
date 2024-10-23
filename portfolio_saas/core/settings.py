@@ -26,11 +26,15 @@ SECRET_KEY = 'django-insecure-10n*wteg=uyf14k9cw32ejl%+vsl9_j28d6)2*=5!r%69bv+_2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Permitir subdomínios
+ALLOWED_HOSTS = ['.portfolizer.com.br', 'portfolizer.com.br']
 
+ROOT_HOSTCONF = 'core.hosts'
+DEFAULT_HOST = 'www'
+ROOT_URLCONF = 'core.urls'
+SESSION_COOKIE_DOMAIN = None
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
     
     # Third-party
     'taggit',
+    'django_hosts',
 ]
 
 MIDDLEWARE = [
@@ -56,15 +61,19 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    'django_hosts.middleware.HostsResponseMiddleware',
 
-ROOT_URLCONF = 'core.urls'
+    # Middleware customizado
+    # 'portfolios.ultra.middleware.SubdomainRoutingMiddleware',
+    # 'portfolios.ultra.middleware.SubdomainRouterMiddleware',
+    # 'portfolios.ultra.middleware.SubdomainSecurityMiddleware',
+]
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Diretório global de templates
-        'APP_DIRS': True,
+        'APP_DIRS': True, # Habilitar templates de apps
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -124,9 +133,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
