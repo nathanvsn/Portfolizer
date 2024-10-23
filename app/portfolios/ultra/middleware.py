@@ -23,10 +23,6 @@ class SubdomainRoutingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Validar o host antes de prosseguir
-        if request.get_host() not in settings.ALLOWED_HOSTS:
-            raise Http404("Host não permitido.")
-
         # Captura o subdomínio
         sld, subdomain_parts = get_subdomain_from_request(request)
         if len(subdomain_parts) > 0:  # Exemplo: ultra.localhost.com
@@ -62,10 +58,6 @@ class SubdomainSecurityMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Validar o host antes de prosseguir
-        if request.get_host() not in settings.ALLOWED_HOSTS:
-            raise Http404("Host não permitido.")
-
         # Captura o subdomínio
         sld, subdomain_parts = get_subdomain_from_request(request)
         if len(subdomain_parts) > 0:

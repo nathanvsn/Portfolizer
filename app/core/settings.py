@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     
     # Third-party
     'taggit',
-    'django_hosts',
+    # 'django_hosts',
 ]
 
 MIDDLEWARE = [
@@ -64,9 +64,9 @@ MIDDLEWARE = [
     'django_hosts.middleware.HostsResponseMiddleware',
 
     # Middleware customizado
-    # 'portfolios.ultra.middleware.SubdomainRoutingMiddleware',
-    # 'portfolios.ultra.middleware.SubdomainRouterMiddleware',
-    # 'portfolios.ultra.middleware.SubdomainSecurityMiddleware',
+    'portfolios.ultra.middleware.SubdomainRoutingMiddleware',
+    'portfolios.ultra.middleware.SubdomainRouterMiddleware',
+    'portfolios.ultra.middleware.SubdomainSecurityMiddleware',
 ]
 
 TEMPLATES = [
