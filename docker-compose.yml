@@ -1,0 +1,22 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    container_name: django_web
+    command: gunicorn --workers 3 --bind 0.0.0.0:8000 core.wsgi:application
+
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
