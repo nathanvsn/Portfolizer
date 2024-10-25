@@ -7,7 +7,7 @@ urlpatterns = [
     path('', include('pages.urls')),
 
     path('portfolio/', include('portfolios.urls')),
-    
+    path('projetos/', include('projetos.urls')),
     path('users/', include('custom_auth.urls')),
 ]
 

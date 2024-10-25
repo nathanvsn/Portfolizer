@@ -2,6 +2,8 @@ from django.db import models
 from custom_auth.models import User
 from taggit.managers import TaggableManager
 from django.db import transaction
+from django.utils import timezone
+from datetime import timedelta
 
 class Portfolio(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='portfolio')
@@ -86,6 +88,10 @@ class Project(models.Model):
                 self.votes -= 1
             self.save()
 
+    # Pegar os projetos pelas tags
+    def get_projects_by_tags(self, tags):
+        return Project.objects.filter(tags__name__in=tags).distinct()
+    
 class Resource(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resources')
     file = models.FileField(upload_to='project_resources/')
@@ -106,3 +112,9 @@ class Vote(models.Model):
 
     class Meta:
         unique_together = ('user', 'project')
+        
+    @classmethod  # Adicionei o decorator de classe
+    def filtro_projetos_data(cls, period):
+        days = {'week': 7, 'month': 30}
+        return Project.objects.filter(created_at__gte=timezone.now() - timedelta(days=days.get(period, 7))).order_by('-votes')
+

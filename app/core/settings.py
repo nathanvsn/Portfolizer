@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'portfolios',
     'custom_auth',
     'pages',
+    'projetos',
     
     # Third-party
     'taggit',

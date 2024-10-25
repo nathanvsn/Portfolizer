@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Projetos{% endblock %}
+
+{% block imports %}
+{% comment %} Paginator {% endcomment %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Lista de Projetos</h1>
+    
+    <!-- Navbar para seleção de períodos -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#">Filtros</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="?tipo=semanal">Semanal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?tipo=mensal">Mensal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?tipo=todos">Todos</a>
+                </li>
+            </ul>
+            <form class="d-flex" method="get" action="">
+                <input class="form-control me-2" type="search" placeholder="Buscar por nome" aria-label="Search" name="search">
+                <input class="form-control me-2" type="text" placeholder="Tags" aria-label="Tags" name="tags">
+                <button class="btn btn-outline-success" type="submit">Filtrar</button>
+            </form>
+        </div>
+    </nav>
+    
+    <div class="row" id="project-list">
+        {% for projeto in projects %}  <!-- Use 'projects' aqui -->
+        
+            <!-- Card do projeto -->
+            {% include 'portfolios/portfolio/partials/user_portfolio/_projetos_listar.html' with project=projeto %}
+        {% empty %}
+            <div>Nenhum projeto encontrado.</div>  <!-- Mensagem padrão caso não haja projetos -->
+        {% endfor %}
+    </div>
+
+    <!-- Botão Carregar Mais -->
+    <div class="text-center mb-4">
+        <button id="load-more" class="btn btn-primary">Carregar mais</button>
+    </div>
+
+    <!-- Paginação -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if projetos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ projetos.previous_page_number }}&tipo={{ tipo }}&tags={{ tags }}&search={{ search }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for i in projetos.paginator.page_range %}
+                <li class="page-item {% if i == projetos.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ i }}&tipo={{ tipo }}&tags={{ tags }}&search={{ search }}">{{ i }}</a>
+                </li>
+            {% endfor %}
+            {% if projetos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ projetos.next_page_number }}&tipo={{ tipo }}&tags={{ tags }}&search={{ search }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+<script>
+    document.getElementById('load-more').addEventListener('click', function() {
+        // Lógica para carregar mais projetos via AJAX
+        // Exemplo básico:
+        let nextPage = {{ next_page_number|default:"null" }};  // Use next_page_number no template
+
+            if (nextPage) {
+                $.ajax({
+                    url: '?page=' + nextPage + '&tipo={{ tipo }}&tags={{ tags|join:"," }}&search={{ search }}',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#project-list').append(data);
+                        if (nextPage >= {{ projects.paginator.num_pages }}) {
+                            $('#load-more').hide(); // Esconde o botão se não houver mais projetos
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Erro ao carregar mais projetos:', error);
+                    }
+                });
+            } else {
+                console.warn('Não há mais páginas para carregar.');
+                $(this).hide(); // Esconde o botão se não houver próxima página
+    }});
+</script>
+{% endblock %}
+
+
+{% block js %}
+{% endblock %}
+
+{% block style %}
+{% endblock %}
