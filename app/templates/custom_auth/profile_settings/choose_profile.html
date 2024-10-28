@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Escolha o seu perfil</h2>
+        <form method="post" action="{% url 'users:choose_profile' %}">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card shadow-sm border-0">
+                        <img src="{% static 'images/custom_auth/choose_profile/Freelancer.webp' %}" class="card-img-top" alt="Freelancer Image">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Freelancer</h5>
+                            <p class="card-text">Mostre e ofereça seu trabalho para o mundo.</p>
+                            <label class="form-check">
+                                <input type="checkbox" name="profile_type" value="freelancer" class="form-check-input">
+                                <span class="form-check-label">Selecionar Freelancer</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card shadow-sm border-0">
+                        <img src="{% static 'images/custom_auth/choose_profile/Client.webp' %}" class="card-img-top" alt="Client Image">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Cliente</h5>
+                            <p class="card-text">Encontre freelancers e projetos ideais para você.</p>
+                            <label class="form-check">
+                                <input type="checkbox" name="profile_type" value="client" class="form-check-input">
+                                <span class="form-check-label">Selecionar Cliente</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary">Confirmar Escolha</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

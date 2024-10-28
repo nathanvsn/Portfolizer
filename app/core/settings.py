@@ -27,14 +27,27 @@ SECRET_KEY = 'django-insecure-10n*wteg=uyf14k9cw32ejl%+vsl9_j28d6)2*=5!r%69bv+_2
 DEBUG = True
 
 # Permitir subdomínios
-ALLOWED_HOSTS = ['.portfolizer.com.br', 'portfolizer.com.br']
+ALLOWED_HOSTS = ['.portfolizer.com.br']
+CSRF_TRUSTED_ORIGINS = ['https://portfolizer.com.br']
+FRONTEND_URL = "https://portfolizer.com.br"
+
 
 ROOT_HOSTCONF = 'core.hosts'
 PARENT_HOST = 'portfolizer.com.br'
 DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'core.urls'
-SESSION_COOKIE_DOMAIN = None
 
+# Permite que os cookies de sessão sejam compartilhados entre subdomínios
+SESSION_COOKIE_DOMAIN = ".portfolizer.com.br"
+CSRF_COOKIE_DOMAIN = ".portfolizer.com.br"
+
+# Cookies de sessão e CSRF seguros em HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Opcional: cookies http-only (mais seguros contra ataques XSS)
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,6 +62,7 @@ INSTALLED_APPS = [
     'custom_auth',
     'pages',
     'projetos',
+    'freelance',
     
     # Third-party
     'taggit',
@@ -63,12 +77,14 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'core.middleware.csrf_middleware.DynamicCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware',
 
     # Middleware customizado
+    'custom_auth.middleware.ProfileRequiredMiddleware',
     'portfolios.ultra.middleware.SubdomainRoutingMiddleware',
     'portfolios.ultra.middleware.SubdomainRouterMiddleware',
     'portfolios.ultra.middleware.SubdomainSecurityMiddleware',
@@ -158,3 +174,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Fazer o gmail enviar e-mails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'nathanitau@gmail.com'
+DEFAULT_FROM_EMAIL = 'nathanitau@gmail.com'
+EMAIL_HOST_PASSWORD = 'xcdrcohntdwlndmw'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Freelancers</h1>
+    <div class="row">
+        {% for freelancer in freelancers %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ freelancer.user.username }}</h5>
+                    <p class="card-text">Tags: {{ freelancer.tags.all|join:", " }}</p>
+                    <a href="{% url 'freelance:freelancer_detail' freelancer.id %}" class="btn btn-primary">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

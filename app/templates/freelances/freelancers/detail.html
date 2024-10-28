@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ freelancer.user.username }}</h1>
+    <p>Bio: {{ freelancer.user.bio }}</p>
+    <p>Tags: {{ freelancer.tags.all|join:", " }}</p>
+    <h3>Avaliações</h3>
+    {% for review in freelancer.user.received_reviews.all %}
+        <div>
+            <strong>{{ review.reviewer.username }}:</strong> {{ review.rating }} - {{ review.comment }}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

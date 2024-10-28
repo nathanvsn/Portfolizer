@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Projetos</h1>
+    
+    {% if request.user.is_authenticated and request.user.is_client %}
+    <div class="text-end mb-3">
+        <a href="{% url 'freelance:work_create' %}" class="btn btn-primary">Adicionar Novo Trabalho</a>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for work in works %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    {% if work.img %}
+                        <img src="{{ work.img.url }}" class="card-img-top" alt="{{ work.title }}">
+                    {% else %}
+                        <img src="{% static 'images/default_work_image.jpg' %}" class="card-img-top" alt="Imagem padrão">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ work.title }}</h5>
+                        <p class="card-text">{{ work.description|truncatewords:20 }}</p>
+                        
+                        <!-- Exibe a foto e o nome da pessoa oferecendo o trabalho -->
+                        <div class="d-flex align-items-center mt-3">
+                            {% if work.client.user.profile_picture %}
+                                <img src="{{ work.client.user.profile_picture.url }}" 
+                                    alt="Foto de {{ work.client.user.username }}" 
+                                    class="rounded-circle me-2" 
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/default_profile_picture.jpg' %}" 
+                                    alt="Foto padrão" 
+                                    class="rounded-circle me-2" 
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                            {% endif %}
+                            <p class="text-muted mb-0">Oferecido por: {{ work.client.user.username }}</p>
+                        </div>
+                        
+                        <!-- Exibe o rating -->
+                        <div class="rating" 
+                            data-average-rating="{{ work.average_rating|default:0 }}" 
+                            data-total-votes="{{ work.total_votes|default:0 }}">
+                        </div>
+                        
+                        <a href="{% url 'freelance:work_detail' work.id %}" class="btn btn-primary mt-3">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ratingContainers = document.querySelectorAll(".rating");
+
+        ratingContainers.forEach(container => {
+            const averageRating = parseFloat(container.getAttribute("data-average-rating"));
+            const totalVotes = parseInt(container.getAttribute("data-total-votes"));
+
+            // Renderizar estrelas cheias e vazias
+            let stars = "";
+            for (let i = 1; i <= 5; i++) {
+                if (i <= averageRating) {
+                    stars += "★";  // Estrela cheia
+                } else {
+                    stars += "☆";  // Estrela vazia
+                }
+            }
+
+            // Adicionar estrelas e total de votos no contêiner
+            if (totalVotes > 0) {
+                container.innerHTML = `<span class="text-warning">${stars}</span> (${totalVotes} votos)`;
+            } else {
+                container.innerHTML = `<span class="text-muted">Sem rating (0)</span>`;
+            }
+        });
+    });
+</script>
+{% endblock %}
+

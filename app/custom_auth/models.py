@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.crypto import get_random_string
+from datetime import timedelta
+from django.utils import timezone
+
+
 
 class User(AbstractUser):
     bio = models.TextField(blank=True)
@@ -8,6 +13,7 @@ class User(AbstractUser):
     twitter = models.URLField(blank=True)
     linkedin = models.URLField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True)
+    is_email_verified = models.BooleanField(default=False)
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -31,9 +37,21 @@ class User(AbstractUser):
     @property
     def is_ultra(self):
         return self.profile.is_ultra  # Acessando o perfil para verificar o tipo de usuário
+    
+    @property
+    def is_freelancer(self):
+        return hasattr(self, 'freelancer_profile')
+    
+    @property
+    def is_client(self):
+        return hasattr(self, 'client_profile')
 
     def __str__(self):
         return self.username
+    
+    def generate_verification_token(self):
+        self.email_verification_token = get_random_string(64)  # Gera um token aleatório
+        self.save()
 
 class UserProfile(models.Model):
     FREE = 'free'
@@ -64,3 +82,22 @@ class UserProfile(models.Model):
     @property
     def is_ultra(self):
         return self.user_type == self.ULTRA
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verification_tokens')
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    @staticmethod
+    def generate_token(user):
+        # Cria um novo token de verificação para o usuário e define o tempo de expiração
+        token = get_random_string(64)
+        expires_at = timezone.now() + timedelta(hours=24)  # Expira em 24 horas
+        return EmailVerificationToken.objects.create(user=user, token=token, expires_at=expires_at)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"Email verification token for {self.user.username}"

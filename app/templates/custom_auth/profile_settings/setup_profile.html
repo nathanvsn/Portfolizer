@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            color: #495057;
+            font-weight: bold;
+        }
+        .btn-save {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card p-4">
+                <h2 class="text-center form-title mb-4">Complete seu Perfil</h2>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <h5 class="form-title">Dados Pessoais e Redes Sociais</h5>
+                        <div class="row">
+                            {{ personal_data_form.first_name.label_tag }} {{ personal_data_form.first_name }}
+                            {{ personal_data_form.last_name.label_tag }} {{ personal_data_form.last_name }}
+                            {{ personal_data_form.bio.label_tag }} {{ personal_data_form.bio }}
+                            {{ personal_data_form.profile_picture.label_tag }} {{ personal_data_form.profile_picture }}
+                        </div>
+                        <div class="row">
+                            {{ personal_data_form.website.label_tag }} {{ personal_data_form.website }}
+                            {{ personal_data_form.github.label_tag }} {{ personal_data_form.github }}
+                            {{ personal_data_form.twitter.label_tag }} {{ personal_data_form.twitter }}
+                            {{ personal_data_form.linkedin.label_tag }} {{ personal_data_form.linkedin }}
+                        </div>
+                    </div>
+
+                    {% if profile_type == 'freelancer' %}
+                        <div class="mb-4">
+                            <h5 class="form-title">Tags para Freelancer</h5>
+                            <div class="row">
+                                {{ freelancer_tag_form.tags.label_tag }} {{ freelancer_tag_form.tags }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-save mt-3">Salvar Perfil</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

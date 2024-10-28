@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ work.title }}</h1>
+    <p>Descrição: {{ work.description }}</p>
+    <p>Tags: {{ work.tags.all|join:", " }}</p>
+    <p>Valor: {{ work.amount }}</p>
+
+    <h3>Propostas</h3>
+    {% for proposal in work.proposals.all %}
+        <div>
+            <strong>{{ proposal.freelancer.user.username }}:</strong> {{ proposal.amount }} - {{ proposal.message }}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

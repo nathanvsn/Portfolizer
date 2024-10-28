@@ -9,6 +9,7 @@ urlpatterns = [
     path('portfolio/', include('portfolios.urls')),
     path('projetos/', include('projetos.urls')),
     path('users/', include('custom_auth.urls')),
+    path('freelancers/', include('freelance.urls')),
 ]
 
 # Adicione esta linha para servir arquivos de mídia durante o desenvolvimento

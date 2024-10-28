@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
+from freelance.models import Freelancer, Client
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -54,4 +55,13 @@ class SocialMediaForm(forms.ModelForm):
             'github': forms.URLInput(attrs={'class': 'form-control'}),
             'twitter': forms.URLInput(attrs={'class': 'form-control'}),
             'linkedin': forms.URLInput(attrs={'class': 'form-control'}),
+        }
+
+# Formulário para tags (somente para freelancers)
+class FreelancerTagForm(forms.ModelForm):
+    class Meta:
+        model = Freelancer
+        fields = ['tags']
+        widgets = {
+            'tags': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adicionar tags'}),
         }
