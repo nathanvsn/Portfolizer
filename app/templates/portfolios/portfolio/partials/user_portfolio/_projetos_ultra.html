@@ -1,0 +1,62 @@
+<!-- templates/files/explorer.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Explorer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>File Explorer</h1>
+    <div class="row">
+        <!-- File List -->
+        <div class="col-md-4">
+            <ul class="list-group">
+                {% for resource in resources %}
+                <li class="list-group-item">
+                    <a href="#" class="file-link" data-file-id="{{ resource.id }}">
+                        {{ resource.file.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- File Viewer -->
+        <div class="col-md-8" id="file-viewer">
+            <h5>Select a file to view</h5>
+            <div id="file-content" class="border p-3">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.file-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const fileId = this.dataset.fileId;
+
+            fetch(`/get-file-content/${fileId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const viewer = document.getElementById('file-content');
+                    if (data.file_type === 'text') {
+                        viewer.innerHTML = `<pre>${data.content}</pre>`;
+                    } else if (data.file_type === 'image') {
+                        viewer.innerHTML = `<img src="${data.content}" class="img-fluid" />`;
+                    } else {
+                        viewer.innerHTML = `<p>File type not supported</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching file content:', error);
+                });
+        });
+    });
+</script>
+</body>
+</html>

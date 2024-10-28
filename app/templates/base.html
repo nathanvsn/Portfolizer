@@ -16,6 +16,24 @@
     {% block css %}{% endblock %}
     
     <!-- Custom JS -->
+    <!-- Bootstrap JS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script> 
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                // Obtém o token CSRF diretamente do campo CSRF no formulário
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                console.log("Token CSRF: " + csrftoken);
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        console.log("Configuração do CSRF Token concluída.");
+
+    </script>
     {% block js %}{% endblock %}
 </head>
 <body>
@@ -29,38 +47,5 @@
 
     <!-- Footer -->
     {% include 'partials/_footer.html' %}
-
-    <!-- Bootstrap JS via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Função para obter o token CSRF do cookie
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Verifica se o cookie começa com o nome "csrftoken"
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-const csrftoken = getCookie('csrftoken');
-
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-});
-
-    </script>
 </body>
 </html>

@@ -83,8 +83,14 @@
         {% include 'portfolios/portfolio/partials/user_portfolio/_pagina_inicial.html' %}
         
         <!-- Tab de Projetos -->
+        {% if user.is_ultra %}
+        {% include 'portfolios/portfolio/partials/user_portfolio/_projetos_ultra.html' %}
+        <a href="{% url 'portfolio:file_manager' user.username %}">Gerenciador de Arquivos</a>
+        {% else %}
         {% include 'portfolios/portfolio/partials/user_portfolio/_projetos.html' %}
-        
+        {% endif %}
+
+
         <!-- Tab de Estatísticas -->
         {% include 'portfolios/portfolio/partials/user_portfolio/_estatisticas.html' %}
     </div>

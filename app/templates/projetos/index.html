@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Lista de Projetos{% endblock %}
 
@@ -7,13 +8,99 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}
 
+{% block css %}
+    <style>
+    .vote-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      transition: transform 0.3s ease;
+      outline: none;
+    }
+
+    .vote-button:hover {
+      transform: scale(1.1);
+    }
+
+    .vote-button svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .vote-button.unvoted .flame-fill {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .vote-button.unvoted .flame-outline {
+      stroke: #ff4d4d;
+      stroke-width: 2;
+      fill: none;
+      transition: all 0.3s ease;
+    }
+
+    .vote-button.voted .flame-fill {
+      opacity: 1;
+      fill: #ff4d4d;
+      animation: flame 0.6s ease-in-out;
+    }
+
+    .vote-button.voted .flame-outline {
+      stroke: #ff4d4d;
+      stroke-width: 0;
+    }
+
+    @keyframes flame {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Efeito de partículas quando votado */
+    .particles {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .particle {
+      position: absolute;
+      background: #ff4d4d;
+      border-radius: 50%;
+      width: 6px;
+      height: 6px;
+      animation: particle 0.6s ease-out forwards;
+    }
+
+    @keyframes particle {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+      }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <h1>Lista de Projetos</h1>
     
     <!-- Navbar para seleção de períodos -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <a class="navbar-brand" href="#">Filtros</a>
+        <a class="navbar-brand" href="#">Melhores Projetos</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
@@ -45,9 +132,15 @@
     </div>
 
     <!-- Botão Carregar Mais -->
-    <div class="text-center mb-4">
-        <button id="load-more" class="btn btn-primary">Carregar mais</button>
-    </div>
+    {% if projetos.has_next %}
+        <div class="text-center mb-4 mt-4">
+            <button id="load-more" class="btn btn-primary">Carregar mais</button>
+        </div>
+    {% else %}
+        <div class="text-center mb-4 mt-4">
+            <button id="load-more" class="btn btn-warning" disabled>Não há mais projetos</button>
+        </div>
+    {% endif %}
 
     <!-- Paginação -->
     <nav aria-label="Page navigation">
@@ -74,7 +167,6 @@
         </ul>
     </nav>
 </div>
-
 <script>
     document.getElementById('load-more').addEventListener('click', function() {
         // Lógica para carregar mais projetos via AJAX
@@ -100,6 +192,19 @@
                 $(this).hide(); // Esconde o botão se não houver próxima página
     }});
 </script>
+<script>
+    // Pega o parâmetro 'tipo' da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipo = urlParams.get('tipo');
+
+    // Verifica qual tipo foi selecionado e adiciona a classe 'active'
+    document.querySelectorAll('.navbar-nav .nav-item .nav-link').forEach(link => {
+        if (link.href.includes(`tipo=${tipo}`)) {
+            link.classList.add('active'); // Adiciona a classe 'active' ao link selecionado
+        }
+    });
+</script>
+<script src="{% static 'js/utils/script_vote.js' %}"></script>
 {% endblock %}
 
 

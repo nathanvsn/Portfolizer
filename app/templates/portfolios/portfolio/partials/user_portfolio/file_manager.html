@@ -1,0 +1,97 @@
+<!-- templates/portfolios/portfolio/user_portfolio/file_manager.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Arquivos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Gerenciador de Arquivos de {{ user.username }}</h1>
+
+    <!-- Formulário de Upload -->
+    <div class="mb-4">
+        <h3>Upload de Arquivos</h3>
+        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="file">Escolha um arquivo</label>
+                {{ form.file }}
+            </div>
+            <button type="submit" class="btn btn-success">Fazer Upload</button>
+        </form>
+    </div>
+    
+    <!-- Lista de Arquivos -->
+    <div class="mb-4">
+        <h3>Arquivos</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Arquivo</th>
+                    <th>Tamanho</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for resource in resources %}
+                    <tr>
+                        <td>{{ resource.file.name }}</td>
+                        <td>{{ resource.file_size|floatformat:2 }} MB</td>
+                        <td>
+                            <a href="{{ resource.file.url }}" class="btn btn-primary" target="_blank">Visualizar</a>
+                            <!-- Verifica se o arquivo é de texto/código e exibe o botão -->
+                            {% if resource.is_text_file %}
+                                <button class="btn btn-info" onclick="showFileContent('{{ resource.id }}')">Abrir Conteúdo</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Área de Visualização -->
+    <div id="file-content" class="border p-3">
+        <h5>Visualização de Arquivos</h5>
+        <div id="file-viewer">
+            <!-- O conteúdo do arquivo aparecerá aqui -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function showFileContent(fileId) {
+        fetch(`/get-file-content/${fileId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const viewer = document.getElementById('file-viewer');
+                if (data.file_type === 'text') {
+                    viewer.innerHTML = `<pre>${data.content}</pre>`;
+                } else if (data.file_type === 'image') {
+                    viewer.innerHTML = `<img src="${data.content}" class="img-fluid" />`;
+                } else {
+                    viewer.innerHTML = `<p>Tipo de arquivo não suportado</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar o conteúdo do arquivo:', error);
+            });
+    }
+</script>
+<script>
+    document.getElementById('uploadForm').onsubmit = function(e) {
+        e.preventDefault();  // Evita o envio padrão
+        const projectName = document.getElementById('project').value;  // Pega o nome do projeto selecionado
+        const username = "{{ user.username }}";  // Username do usuário
+
+        // Redireciona o formulário para a URL correta de upload
+        this.action = `/portfolio/upload-resource/${username}/${projectName}/`;
+        this.submit();
+    };
+</script>
+</body>
+</html>

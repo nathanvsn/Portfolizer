@@ -12,6 +12,16 @@ def user_portfolio(request, username):
     user = get_object_or_404(User, username=username)
     portfolio = user.portfolio
     projects = portfolio.projects.all()
+    
+    # Verificar se o username é um user Ultra
+    if user.is_ultra:
+        # Se for o proprietário do projeto, pass
+        if request.user == user:
+            pass
+        else:
+            # Redirecionar para a view de subdomínio
+            ultra_url = f'https://{user}.{request.get_host()}/'
+            return redirect(ultra_url)
 
     # Verificar se o usuário logado já votou em cada projeto
     for project in projects:
@@ -128,10 +138,8 @@ def vote_project(request, username, project_name):
     vote, created = Vote.objects.get_or_create(user=request.user, project=project)
 
     if created:
-        print('Voto adicionado!')
         project.add_vote()
     else:
-        print('Voto removido!')
         vote.delete()
         project.remove_vote() 
     
@@ -268,3 +276,49 @@ def upload_img_project(request, username, project_name):
             messages.error(request, 'Erro ao adicionar a imagem. Por favor, tente novamente.')
 
     return JsonResponse({'success': True})
+
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse, HttpResponse
+from .models import Resource
+import mimetypes
+
+@login_required
+def file_manager(request, username):
+    user = get_object_or_404(User, username=username)
+    if request.user != user:
+        return redirect('portfolio:user_portfolio', username=user.username)
+
+    # Busca os arquivos do usuário ultra
+    resources = Resource.objects.filter(project__portfolio__user=user)
+
+    # Verifica se cada arquivo é de tipo texto/código
+    for resource in resources:
+        resource.is_text_file = resource.file.name.lower().endswith(('.txt', '.css', '.js'))
+
+    projects = user.portfolio.projects.all()
+
+    context = {
+        'user': user,
+        'resources': resources,
+        'projects': projects,
+    }
+
+    return render(request, 'portfolios/portfolio/partials/user_portfolio/file_manager.html', context)
+
+def get_file_content(request, file_id):
+    """Retorna o conteúdo de um arquivo de texto ou a URL de uma imagem."""
+    resource = get_object_or_404(Resource, id=file_id)
+    file_path = resource.file.path
+    file_type, encoding = mimetypes.guess_type(file_path)
+
+    if file_type and 'text' in file_type:
+        with open(file_path, 'r') as f:
+            content = f.read()
+        return JsonResponse({'content': content, 'file_type': 'text'})
+    elif file_type and file_type.startswith('image'):
+        return JsonResponse({'content': resource.file.url, 'file_type': 'image'})
+    else:
+        return JsonResponse({'error': 'File type not supported'}, status=400)

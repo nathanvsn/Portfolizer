@@ -1,26 +1,26 @@
-services:
-  web:
-    build:
-      context: .
-      dockerfile: ./app/Dockerfile
-    container_name: django_web
-    command: gunicorn --workers 3 --bind 0.0.0.0:8000 core.wsgi:application
+  services:
+    web:
+      build:
+        context: .
+        dockerfile: ./app/Dockerfile
+      container_name: django_web
+      command: gunicorn --workers 3 --bind 0.0.0.0:8000 core.wsgi:application
 
-    volumes:
-      - ./app:/app
-    ports:
-      - "8000:8000"
+      volumes:
+        - ./app:/app
+      ports:
+        - "8000:8000"
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx_proxy
-    ports:
-      - "80:80"   # Porta HTTP
-      - "443:443" # Porta HTTPS
-    volumes:
-      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/certs:/etc/nginx/certs  # Mapeia o diretório de certificados
-      - ./app/staticfiles:/staticfiles  # Mapeia o diretório de arquivos estáticos
-      - ./app/media:/mediafiles  # Mapeia o diretório de arquivos de mídia
-    depends_on:
-      - web
+    nginx:
+      image: nginx:latest
+      container_name: nginx_proxy
+      ports:
+        - "80:80"   # Porta HTTP
+        - "443:443" # Porta HTTPS
+      volumes:
+        - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
+        - ./nginx/certs:/etc/nginx/certs
+        - ./app/staticfiles:/staticfiles
+        - ./app/media:/mediafiles
+      depends_on:
+        - web

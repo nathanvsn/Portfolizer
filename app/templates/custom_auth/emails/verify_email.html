@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Email - Portfolizer</title>
+    <style>
+        /* Reset de estilos para clientes de email */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, Helvetica, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+        }
+
+        /* Container principal */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+
+        /* Conteúdo */
+        .content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        h1 {
+            color: #333333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            color: #666666;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        /* Botão */
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .button {
+            background-color: #ff6d00;
+            border-radius: 4px;
+            color: white !important;
+            padding: 12px 30px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 auto;
+            /* Hack para outlook */
+            mso-padding-alt: 12px 30px;
+            mso-line-height-rule: exactly;
+        }
+
+        /* Rodapé */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .footer p {
+            color: #999999;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .social-links {
+            margin: 20px 0;
+        }
+
+        .social-link {
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        /* Responsividade */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .content {
+                padding: 15px !important;
+            }
+
+            .button {
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td>
+                <div class="email-container">
+                    <!-- Cabeçalho -->
+                    <div class="header">
+                        <img src="[URL_DO_SEU_LOGO]" alt="Portfolizer" class="logo">
+                    </div>
+
+                    <!-- Conteúdo -->
+                    <div class="content">
+                        <h1>Confirme seu e-mail</h1>
+                        
+                        <p>Olá {{ user.username }},</p>
+                        
+                        <p>Obrigado por se cadastrar no Portfolizer! Para começar a usar nossa plataforma e garantir a segurança da sua conta, precisamos confirmar seu endereço de e-mail.</p>
+
+                        <div class="button-container">
+                            <a href="{{ link }}" class="button">Confirmar e-mail</a>
+                        </div>
+
+                        <p>Este link é válido por 24 horas. Se você não conseguir clicar no botão acima, copie e cole o link abaixo no seu navegador:</p>
+                        
+                        <p style="word-break: break-all; font-size: 14px; color: #999999;">
+                            {{ link }}
+                        </p>
+
+                        <p>Se você não solicitou esta confirmação de e-mail, por favor ignore esta mensagem.</p>
+
+                        <p>Atenciosamente,<br>Equipe Portfolizer</p>
+                    </div>
+
+                    <!-- Rodapé -->
+                    <div class="footer">
+                        <div class="social-links">
+                            <a href="#" class="social-link">LinkedIn</a>
+                            <a href="#" class="social-link">Twitter</a>
+                            <a href="#" class="social-link">Instagram</a>
+                        </div>
+                        <p>© 2024 Portfolizer. Todos os direitos reservados.</p>
+                        <p>Este é um e-mail automático. Por favor, não responda.</p>
+                        <p>Uberlândia, MG</p>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

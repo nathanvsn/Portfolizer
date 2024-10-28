@@ -92,9 +92,14 @@ class Project(models.Model):
     def get_projects_by_tags(self, tags):
         return Project.objects.filter(tags__name__in=tags).distinct()
     
+def user_directory_path(instance, filename):
+    # Define o caminho de upload como: 'user_<id>/<filename>'
+    return f'user_{instance.project.portfolio.user.id}/{filename}'
+
+
 class Resource(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='resources')
-    file = models.FileField(upload_to='project_resources/')
+    file = models.FileField(upload_to=user_directory_path)  # Usando a função customizada
     file_type = models.CharField(max_length=20)  # Tipo do arquivo (ex: image/png, application/pdf)
     file_size = models.PositiveIntegerField()  # Armazenar o tamanho do arquivo em bytes
 
