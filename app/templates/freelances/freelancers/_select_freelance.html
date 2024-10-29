@@ -1,0 +1,46 @@
+<div class="modal fade" id="freelancerOptionsModal" tabindex="-1" aria-labelledby="freelancerOptionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="freelancerOptionsModalLabel">Ações do Freelancer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    <!-- Opção Visitar Perfil -->
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-user me-2"></i>
+                        <a href="#" id="visitProfileLink" class="stretched-link">Visitar Perfil</a>
+                    </li>
+                    <!-- Opção Ver Portfólio -->
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-briefcase me-2"></i>
+                        <a href="#" id="viewPortfolioLink" class="stretched-link">Ver Portfólio</a>
+                    </li>
+                    <!-- Opção Enviar Mensagem -->
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="#" id="sendMessageLink" class="stretched-link">Enviar Mensagem</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function openFreelancerModal(username) {
+    // Configura o link do perfil (modifique o link base conforme necessário)
+    document.getElementById("visitProfileLink").setAttribute("href", `/profile/${username}`);
+
+    // Configura o link do portfólio (modifique para a URL correta)
+    document.getElementById("viewPortfolioLink").setAttribute("href", `/portfolio/${username}`);
+
+    // Configura o link de mensagem (caso precise de um link específico)
+    document.getElementById("sendMessageLink").setAttribute("href", `/messages/send/${username}`);
+
+    // Abre o modal
+    var myModal = new bootstrap.Modal(document.getElementById('freelancerOptionsModal'));
+    myModal.show();
+}
+
+</script>
