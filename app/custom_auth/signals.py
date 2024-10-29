@@ -14,7 +14,7 @@ def send_verification_email(sender, instance, created, **kwargs):
     """
     Signal para enviar email de verificação quando um novo usuário é criado
     """
-    if created and not instance.is_verified:
+    if created and not instance.is_email_verified:
         try:
             # Gera token seguro para verificação
             signer = Signer()
