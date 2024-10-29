@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+# Ler variaveis do sistema
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,25 +24,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-10n*wteg=uyf14k9cw32ejl%+vsl9_j28d6)2*=5!r%69bv+_2'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-#&NODABIAS66238jhdasdhado_DBA')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # Permitir subdomínios
-ALLOWED_HOSTS = ['.portfolizer.com.br']
-CSRF_TRUSTED_ORIGINS = ['https://portfolizer.com.br']
-FRONTEND_URL = "https://portfolizer.com.br"
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8000')
 
 
 ROOT_HOSTCONF = 'core.hosts'
-PARENT_HOST = 'portfolizer.com.br'
+PARENT_HOST = os.getenv('PARENT_HOST', 'localhost')
 DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'core.urls'
 
 # Permite que os cookies de sessão sejam compartilhados entre subdomínios
-SESSION_COOKIE_DOMAIN = ".portfolizer.com.br"
-CSRF_COOKIE_DOMAIN = ".portfolizer.com.br"
+SESSION_COOKIE_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
+CSRF_COOKIE_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
 
 # Cookies de sessão e CSRF seguros em HTTPS
 SESSION_COOKIE_SECURE = True
@@ -178,9 +181,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Fazer o gmail enviar e-mails
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'nathanitau@gmail.com'
-DEFAULT_FROM_EMAIL = 'nathanitau@gmail.com'
-EMAIL_HOST_PASSWORD = 'xcdrcohntdwlndmw'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'teste@teste.com')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER', 'teste@teste.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'senha')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
