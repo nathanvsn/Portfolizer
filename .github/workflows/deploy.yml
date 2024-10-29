@@ -17,7 +17,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ vars.SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Copy files to server
         run: |
@@ -29,9 +29,9 @@ jobs:
           CSRF_TRUSTED_ORIGINS: ${{ vars.CSRF_TRUSTED_ORIGINS }}
           FRONTEND_URL: ${{ vars.FRONTEND_URL }}
           PARENT_HOST: ${{ vars.PARENT_HOST }}
-          EMAIL_HOST_USER: ${{ vars.EMAIL_HOST_USER }}
-          EMAIL_HOST_PASSWORD: ${{ vars.EMAIL_HOST_PASSWORD }}
-          DJANGO_SECRET_KEY: ${{ vars.DJANGO_SECRET_KEY }}
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         run: |
           ssh -p ${{ vars.PORT }} ${{ vars.USER }}@${{ vars.HOST }} "
           docker compose down &&
