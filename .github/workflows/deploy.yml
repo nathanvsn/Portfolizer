@@ -39,6 +39,7 @@ jobs:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         run: |
           ssh -p ${{ vars.PORT }} ${{ vars.USER }}@${{ vars.HOST }} "
+          cd Portfolizer &&
           docker-compose down &&
           docker-compose build &&
           docker-compose up -d
