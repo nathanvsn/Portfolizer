@@ -26,7 +26,7 @@ jobs:
 
       - name: Copy files to server
         run: |
-          rsync -avz --exclude '.git/' --exclude '.github/' -e "ssh -p ${{ vars.PORT }}" . ${{ vars.USER }}@${{ vars.HOST }}:/Portfolizer
+          rsync -avz --exclude '.git/' --exclude '.github/' -e "ssh -p ${{ vars.PORT }}" . ${{ vars.USER }}@${{ vars.HOST }}:Portfolizer
       - name: Build Docker Compose on server
         env:
           DEBUG: ${{ vars.DEBUG }}
