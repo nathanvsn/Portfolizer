@@ -20,7 +20,7 @@ jobs:
       
       - name: Touch on /app .env file
         run: |
-          cat <<EOF > app/.env
+          cat <<EOF > .env
           DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG=${{ vars.DEBUG }}
           ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }}
