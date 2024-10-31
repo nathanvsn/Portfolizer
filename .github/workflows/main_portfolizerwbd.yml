@@ -1,18 +1,16 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
-
-name: Build and deploy Python app to Azure Web App - portfolizerWbd
+name: Build and Deploy Python Application
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    name: Build and Start Containers
+    environment:
+      name: PRODUCTION
 
     steps:
       - uses: actions/checkout@v4
@@ -22,57 +20,37 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-        
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+      - name: Stop existing containers
+        run: docker-compose down
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: |
-            release.zip
-            !venv/
+      - name: Build and start containers with environment variables
+        run: docker-compose up --build -d
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET }}
+          DEBUG: ${{ vars.DEBUG }}
+          ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+          CSRF_TRUSTED_ORIGINS: ${{ vars.CSRF_TRUSTED_ORIGINS }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          PARENT_HOST: ${{ vars.PARENT_HOST }}
+          EMAIL_HOST_USER: ${{ vars.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-
+    name: Deploy and Validate
+  
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
+      - name: Wait for Django Server to be ready
+        run: |
+          until curl -s -o /dev/null -w "%{http_code}" http://localhost:8000 | grep -q "200"; do
+            echo "Waiting for Django server..."
+            sleep 5
+          done
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F313AB1426BA47D3A53649B1A4F3A4B2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AECC87D445AF4D69957F75054E27D726 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD5BA8329F664D6FB4366BE54092A0BE }}
-
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
-        with:
-          app-name: 'portfolizerWbd'
-          slot-name: 'Production'
-          
+      - name: Validate Nginx Server
+        run: |
+          until curl -s -o /dev/null -w "%{http_code}" http://localhost:80 | grep -q "200"; do
+            echo "Waiting for Nginx server..."
+            sleep 5
+          done

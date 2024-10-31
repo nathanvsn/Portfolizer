@@ -36,7 +36,7 @@ class EmailService:
             }
             
             # Renderiza o template HTML
-            html_content = render_to_string('emails/verification_email.html', context)
+            html_content = render_to_string('custom_auth/emails/verify_email.html', context)
             
             # Envia o email
             sent = send_mail(
