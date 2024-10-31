@@ -17,18 +17,31 @@ jobs:
 
       - name: Stop existing containers
         run: docker-compose down
+      
+      - name: Touch on /app .env file
+        run: |
+          cat <<EOF > app/.env
+          DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG=${{ vars.DEBUG }}
+          ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }}
+          CSRF_TRUSTED_ORIGINS=${{ vars.CSRF_TRUSTED_ORIGINS }}
+          FRONTEND_URL=${{ vars.FRONTEND_URL }}
+          PARENT_HOST=${{ vars.PARENT_HOST }}
+          EMAIL_HOST_USER=${{ vars.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          EOF
+        env:
+            DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+            DEBUG: ${{ vars.DEBUG }}
+            ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+            CSRF_TRUSTED_ORIGINS: ${{ vars.CSRF_TRUSTED_ORIGINS }}
+            FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+            PARENT_HOST: ${{ vars.PARENT_HOST }}
+            EMAIL_HOST_USER: ${{ vars.EMAIL_HOST_USER }}
+            EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
 
       - name: Build and start containers with environment variables
         run: docker-compose up --build -d
-        env:
-          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          DEBUG: ${{ vars.DEBUG }}
-          ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
-          CSRF_TRUSTED_ORIGINS: ${{ vars.CSRF_TRUSTED_ORIGINS }}
-          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
-          PARENT_HOST: ${{ vars.PARENT_HOST }}
-          EMAIL_HOST_USER: ${{ vars.EMAIL_HOST_USER }}
-          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
 
   test-connection:
     runs-on: self-hosted
