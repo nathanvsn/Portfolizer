@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Wait for Django Server to be ready
         run: |
-          until curl -s -o /dev/null -w "%{https_code}" ${{ vars.FRONTEND_URL }} | grep -q "200"; do
+          until curl -s -o /dev/null -w "%{http_code}" ${{ vars.FRONTEND_URL }} | grep -q "200"; do
             echo "Waiting for Django server..."
             sleep 5
           done

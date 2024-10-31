@@ -23,13 +23,12 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cookie_domain ${DOMAIN_NAME};
     }
 }
 
 server {
     listen 80;
-    server_name .portfolizer.com.br;
+    server_name ${DOMAIN_NAME};
 
     location / {
         return 301 https://$host$request_uri;

@@ -27,7 +27,7 @@
         - "80:80"   # Porta HTTP
         - "443:443" # Porta HTTPS
       environment:
-        - DOMAIN_NAME=${CSRF_TRUSTED_ORIGINS}
+        - DOMAIN_NAME=${PARENT_HOST}
       volumes:
         - ./nginx/site.conf.template:/etc/nginx/templates/site.conf.template
         - ./nginx/certs:/etc/nginx/certs
