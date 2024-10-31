@@ -1,12 +1,9 @@
 # Usar uma imagem oficial do Python
-FROM python:3.10-slim
+FROM python:3.10-slim as builder
 
 # Configurações de ambiente
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
-# Instalar dependências do Python
-COPY requirements.txt /app/
 
 # Criar o diretório de trabalho no contêiner
 WORKDIR /app
@@ -17,12 +14,21 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Copiar e instalar dependências do Python
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copiar o código da aplicação
+# Copiar o código da aplicação para a imagem de build
 COPY /app/ /app/
 
-# Executar o servidor Django
-CMD ["gunicorn", "--workers=3", "--bind=0.0.0.0:8000", "core.wsgi:application"]
+# Usar a imagem de build como base
+FROM builder as deploy
 
+# Configurações de ambiente
+ENV DJANGO_SETTINGS_MODULE=core.settings
+
+# Executar migrações, testes e coleta de arquivos estáticos
+WORKDIR /app
+
+# Executar migrações, testes e coleta de arquivos estáticos antes de iniciar o servidor
+CMD sh -c "python manage.py migrate && python manage.py test && python manage.py collectstatic --noinput && gunicorn --workers=3 --bind=0.0.0.0:8000 core.wsgi:application"
