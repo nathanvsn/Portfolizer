@@ -19,9 +19,9 @@ jobs:
         run: docker-compose down
 
       - name: Build and start containers with environment variables
-        run: docker-compose up --build -d DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET }} DEBUG=${{ vars.DEBUG }} ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} CSRF_TRUSTED_ORIGINS=${{ vars.CSRF_TRUSTED_ORIGINS }} FRONTEND_URL=${{ vars.FRONTEND_URL }} PARENT_HOST=${{ vars.PARENT_HOST }} EMAIL_HOST_USER=${{ vars.EMAIL_HOST_USER }} EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        run: docker-compose up --build -d
         env:
-          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG: ${{ vars.DEBUG }}
           ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
           CSRF_TRUSTED_ORIGINS: ${{ vars.CSRF_TRUSTED_ORIGINS }}
@@ -30,7 +30,7 @@ jobs:
           EMAIL_HOST_USER: ${{ vars.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
 
-  deploy:
+  test-connection:
     runs-on: self-hosted
     needs: build
     name: Deploy and Validate
