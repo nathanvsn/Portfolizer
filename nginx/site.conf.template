@@ -1,41 +1,35 @@
 server {
     listen 443 ssl;
-    server_name ${DOMAIN_NAME}
+    server_name ${DOMAIN_NAME};
 
     ssl_certificate     /etc/nginx/certs/seu_certificado.crt;
     ssl_certificate_key /etc/nginx/certs/sua_chave_privada.key;
 
-    # Servir arquivos estáticos
     location /static/ {
-        alias /staticfiles/;  # Verifique se esse caminho está correto no container
+        alias /staticfiles/;
         expires 30d;
         add_header Cache-Control "public";
     }
 
-    # Servir arquivos de mídia (caso necessário)
     location /media/ {
-        alias /mediafiles/;  # Verifique se esse caminho está correto no container
+        alias /mediafiles/;
         expires 30d;
         add_header Cache-Control "public";
     }
 
-    # Proxy para o Django
     location / {
-        # Mantenha apenas um cabeçalho Host
         proxy_pass http://web:8000;
-        proxy_set_header Host $host;  # Mantém o host original da requisição (inclui subdomínios)
+        proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-
-        proxy_cookie_domain ${DOMAIN_NAME}
+        proxy_cookie_domain ${DOMAIN_NAME};
     }
 }
 
-# Redirecionar HTTP para HTTPS
 server {
     listen 80;
-    server_name .portfolizer.com.br;  # Adicione o ponto para pegar todos os subdomínios
+    server_name .portfolizer.com.br;
 
     location / {
         return 301 https://$host$request_uri;
