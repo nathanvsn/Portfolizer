@@ -15,16 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
       - name: Stop existing containers
         run: docker-compose down
 
       - name: Build and start containers with environment variables
-        run: docker-compose up --build -d
+        run: docker-compose up --build -d DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET }} DEBUG=${{ vars.DEBUG }} ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} CSRF_TRUSTED_ORIGINS=${{ vars.CSRF_TRUSTED_ORIGINS }} FRONTEND_URL=${{ vars.FRONTEND_URL }} PARENT_HOST=${{ vars.PARENT_HOST }} EMAIL_HOST_USER=${{ vars.EMAIL_HOST_USER }} EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
         env:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET }}
           DEBUG: ${{ vars.DEBUG }}
@@ -39,18 +34,13 @@ jobs:
     runs-on: self-hosted
     needs: build
     name: Deploy and Validate
+    environment:
+      name: PRODUCTION
   
     steps:
       - name: Wait for Django Server to be ready
         run: |
-          until curl -s -o /dev/null -w "%{http_code}" http://localhost:8000 | grep -q "200"; do
+          until curl -s -o /dev/null -w "%{https_code}" ${{ vars.FRONTEND_URL }} | grep -q "200"; do
             echo "Waiting for Django server..."
-            sleep 5
-          done
-
-      - name: Validate Nginx Server
-        run: |
-          until curl -s -o /dev/null -w "%{http_code}" http://localhost:80 | grep -q "200"; do
-            echo "Waiting for Nginx server..."
             sleep 5
           done
