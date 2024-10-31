@@ -26,6 +26,8 @@
       ports:
         - "80:80"   # Porta HTTP
         - "443:443" # Porta HTTPS
+      environment:
+        - DOMAIN_NAME=${CSRF_TRUSTED_ORIGINS}
       volumes:
         - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
         - ./nginx/certs:/etc/nginx/certs
