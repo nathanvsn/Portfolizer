@@ -1,5 +1,9 @@
 from django.urls import path
 from . import views
+from .api.views import (
+    ToggleVoteView,
+    ProjectListAPIView
+)
 
 app_name = 'portfolio'
 
@@ -18,15 +22,18 @@ urlpatterns = [
 
 
     path('create-project/<str:username>/', views.create_project, name='create_project'),
-    path('<str:username>/<str:project_name>/', views.project_detail, name='project_detail'),
+    path('detail/<str:username>/<str:project_name>/', views.project_detail, name='project_detail'),
     path('edit/<str:username>/<str:project_name>/', views.edit_project, name='edit_project'),
     path('project/edit-image/<str:username>/<str:project_name>/', views.edit_project_image, name='edit_project_image'),
     
     path('vote/<str:username>/<str:project_name>/', views.vote_project, name='vote_project'),
 
-    path('<str:username>/<str:project_name>/delete/', views.delete_project, name='delete_project'),
+    path('delete/<str:username>/<str:project_name>/', views.delete_project, name='delete_project'),
     
     path('project/<str:username>/<str:project_name>/', views.project_detail_ajax, name='project_detail_ajax'),
     
     
+    # APIS
+    path('api/vote/<int:project_id>/', ToggleVoteView.as_view(), name='toggle_vote'),
+    path('api/projects/', ProjectListAPIView.as_view(), name='project_list'),
 ]
