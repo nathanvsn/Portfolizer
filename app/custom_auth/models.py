@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.crypto import get_random_string
@@ -32,11 +33,11 @@ class User(AbstractUser):
 
     @property
     def is_pro(self):
-        return self.profile.is_pro  # Acessando o perfil para verificar o tipo de usuário
+        return self.profile.is_pro
     
     @property
     def is_ultra(self):
-        return self.profile.is_ultra  # Acessando o perfil para verificar o tipo de usuário
+        return self.profile.is_ultra
     
     @property
     def is_freelancer(self):
@@ -50,8 +51,14 @@ class User(AbstractUser):
         return self.username
     
     def generate_verification_token(self):
-        self.email_verification_token = get_random_string(64)  # Gera um token aleatório
+        self.email_verification_token = get_random_string(64)
         self.save()
+
+    # Quando o perfil for criado, criar um perfil de usuário
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not hasattr(self, 'profile'):
+            UserProfile.objects.create(user=self)
 
 class UserProfile(models.Model):
     FREE = 'free'

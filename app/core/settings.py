@@ -16,24 +16,36 @@ import os
 # Ler variaveis do sistema
 from dotenv import load_dotenv
 
+# Carrega o .env antes de qualquer outra ação
+load_dotenv()
+
+def get_env_variable(var_name, default=None):
+    """
+    Get the environment variable or return exception
+    :param var_name:
+    :return:
+    """
+    value = os.getenv(var_name)
+    if value is not None:
+        return value
+    elif default is not None:
+        return default
+    raise Exception(f"Set the {var_name} environment variable")
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-#&NODABIAS66238jhdasdhado_DBA')
+SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = get_env_variable('DEBUG', 'True') == 'True'
 
 # Permitir subdomínios
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8000')
-
+ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS').split(',') if not DEBUG else ['*']
+CSRF_TRUSTED_ORIGINS = get_env_variable('CSRF_TRUSTED_ORIGINS').split(',') if not DEBUG else []
+FRONTEND_URL = get_env_variable('FRONTEND_URL') if not DEBUG else 'http://localhost:8000'
 
 ROOT_HOSTCONF = 'core.hosts'
 PARENT_HOST = os.getenv('PARENT_HOST', 'localhost')
@@ -41,16 +53,17 @@ DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'core.urls'
 
 # Permite que os cookies de sessão sejam compartilhados entre subdomínios
-SESSION_COOKIE_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
-CSRF_COOKIE_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'localhost').split(',')
+CSRF_TRUSTED_ORIGINS = get_env_variable('CSRF_TRUSTED_ORIGINS').split(',') if not DEBUG else []
+SESSION_COOKIE_DOMAIN = get_env_variable('CSRF_TRUSTED_ORIGINS').split(',') if not DEBUG else None
 
 # Cookies de sessão e CSRF seguros em HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True if not DEBUG else False
+CSRF_COOKIE_SECURE = True if not DEBUG else False
 
 # Opcional: cookies http-only (mais seguros contra ataques XSS)
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -71,6 +84,7 @@ INSTALLED_APPS = [
     'taggit',
     'django_hosts',
     'django_extensions',
+    'django_filters',
 ]
 
 
@@ -187,4 +201,3 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'senha')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-
