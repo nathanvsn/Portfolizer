@@ -1,0 +1,41 @@
+{% comment %} Ocupar toda a linha {% endcomment %}
+<div class="col" onclick="openworkModal('{{ work.user.username }}')" style="cursor: pointer;">
+    <div class="card h-100">
+        <div class="row g-0">
+            <!-- Imagem do Perfil -->
+            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                <img src="{{ work.user.profile_picture.url }}" alt="Foto de {{ work.user.username }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+            </div>
+            
+            <!-- Informações do work -->
+            <div class="col-md-8">
+                <div class="card-body">
+                    <!-- Nome e Bio -->
+                    <h5 class="card-title">{{ work.user.username }}</h5>
+                    <!-- Rating (Estrelas) -->
+                    <p class="card-text">
+                        <img src="https://d1fuainj13qzhu.cloudfront.net/2.9.24/images/raty/star-on.png" title="">
+                        <img src="https://d1fuainj13qzhu.cloudfront.net/2.9.24/images/raty/star-on.png" title="">
+                        <img src="https://d1fuainj13qzhu.cloudfront.net/2.9.24/images/raty/star-on.png"  title="">
+                        <img src="https://d1fuainj13qzhu.cloudfront.net/2.9.24/images/raty/star-half.png" title="">
+                        <img src="https://d1fuainj13qzhu.cloudfront.net/2.9.24/images/raty/star-off.png"  title="">
+                    </p>
+                    <p class="card-text text-muted">{{ work.user.bio|default:"Sem bio disponível" }}</p>
+                    
+
+                    <!-- Número de Projetos Concluídos -->
+                    <p class="card-text">
+                        <strong>Projetos Concluídos:</strong> {{ work.completed_projects_count|default:"0" }}
+                    </p>
+
+                    <!-- Tags como Badges -->
+                    <div>
+                        {% for tag in work.tags.all %}
+                            <span class="badge bg-primary me-1">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,54 +2,73 @@
 {% load static %}
 {% block content %}
 <div class="container mt-4">
-    <h1>Projetos</h1>
-    
-    {% if request.user.is_authenticated and request.user.is_client %}
-    <div class="text-end mb-3">
-        <a href="{% url 'freelance:work_create' %}" class="btn btn-primary">Adicionar Novo Trabalho</a>
-    </div>
-    {% endif %}
-    
+    <h1>Works</h1>
     <div class="row">
-        {% for work in works %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    {% if work.img %}
-                        <img src="{{ work.img.url }}" class="card-img-top" alt="{{ work.title }}">
-                    {% else %}
-                        <img src="{% static 'images/default_work_image.jpg' %}" class="card-img-top" alt="Imagem padrão">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ work.title }}</h5>
-                        <p class="card-text">{{ work.description|truncatewords:20 }}</p>
-                        
-                        <!-- Exibe a foto e o nome da pessoa oferecendo o trabalho -->
-                        <div class="d-flex align-items-center mt-3">
-                            {% if work.client.user.profile_picture %}
-                                <img src="{{ work.client.user.profile_picture.url }}" 
-                                    alt="Foto de {{ work.client.user.username }}" 
-                                    class="rounded-circle me-2" 
-                                    style="width: 40px; height: 40px; object-fit: cover;">
-                            {% else %}
-                                <img src="{% static 'images/default_profile_picture.jpg' %}" 
-                                    alt="Foto padrão" 
-                                    class="rounded-circle me-2" 
-                                    style="width: 40px; height: 40px; object-fit: cover;">
-                            {% endif %}
-                            <p class="text-muted mb-0">Oferecido por: {{ work.client.user.username }}</p>
-                        </div>
-                        
-                        <!-- Exibe o rating -->
-                        <div class="rating" 
-                            data-average-rating="{{ work.average_rating|default:0 }}" 
-                            data-total-votes="{{ work.total_votes|default:0 }}">
-                        </div>
-                        
-                        <a href="{% url 'freelance:work_detail' work.id %}" class="btn btn-primary mt-3">Ver Detalhes</a>
+    
+        {% if request.user.is_authenticated and request.user.is_client %}
+        <div class="text-end mb-3">
+            <a href="{% url 'freelance:work_create' %}" class="btn btn-primary">Novo Trabalho</a>
+        </div>
+        {% endif %}
+        
+        <!-- Barra lateral com filtros -->
+        <div class="col-md-3">
+            <div class="card p-3 mb-4">
+                <h5 class="card-title">Filtros</h5>
+                <form method="get">
+                    <!-- Campo de busca por termo -->
+                    <div class="form-group mb-3">
+                        <label for="search_term">Buscar termo</label>
+                        <input type="text" id="search_term" name="search_term" class="form-control" placeholder="Digite um termo" value="{{ request.GET.search_term }}">
                     </div>
-                </div>
+
+                    <!-- Lista de tags com contador de projetos -->
+                    <div class="form-group mb-3">
+                        <label>Tags</label>
+                        <div class="list-group">
+                            {% for tag, count in available_tags_with_counts.items %}
+                                <label class="list-group-item d-flex justify-content-between align-items-center">
+                                    <input type="checkbox" name="tags" value="{{ tag }}" {% if tag in selected_tags %}checked{% endif %}>
+                                    {{ tag }}
+                                    <span class="badge bg-secondary">{{ count }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Botão de aplicação dos filtros -->
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                </form>
             </div>
-        {% endfor %}
+        </div>
+
+        <!-- Área principal com ordenação e lista de works -->
+        <div class="col-md-9">
+            <!-- Filtros de ordenação -->
+            <div class="d-flex justify-content-start mb-3">
+                <form method="get" class="d-flex align-items-center">
+                    <label for="sort_by" class="me-2">Ordenar por:</label>
+                    <select id="sort_by" name="sort_by" class="form-select me-2" style="width: auto;">
+                        <option value="a-z" {% if request.GET.sort_by == "a-z" %}selected{% endif %}>A-Z</option>
+                        <option value="z-a" {% if request.GET.sort_by == "z-a" %}selected{% endif %}>Z-A</option>
+                        <option value="ranking_desc" {% if request.GET.sort_by == "ranking_desc" %}selected{% endif %}>Maior Ranking</option>
+                        <option value="ranking_asc" {% if request.GET.sort_by == "ranking_asc" %}selected{% endif %}>Menor Ranking</option>
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Ordenar</button>
+                </form>
+            </div>
+
+            <!-- Lista de works ocupando o restante das colunas -->
+            <div class="row">
+                {% for work in works %}
+                    <div class="col-12">
+                        {% include 'freelances/works/_works_card.html' with freelancer=freelancer %}
+                    </div>
+                {% empty %}
+                    <div class="col-12">Nenhum Work encontrado.</div>  <!-- Mensagem padrão caso não haja Work -->
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 <script>

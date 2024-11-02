@@ -50,10 +50,14 @@
                 </form>
             </div>
 
-            <!-- Lista de freelancers Ocupando o restante das colunas-->
+            <!-- Lista de freelancers ocupando o restante das colunas -->
             <div class="row">
                 {% for freelancer in freelancers %}
-                    {% include 'freelances/freelancers/_freelancer_card.html' with freelancer=freelancer %}
+                    <div class="col-12">
+                        {% include 'freelances/freelancers/_freelancer_card.html' with freelancer=freelancer %}
+                    </div>
+                {% empty %}
+                    <div class="col-12">Nenhum freelancer encontrado.</div>  <!-- Mensagem padrão caso não haja freelancers -->
                 {% endfor %}
             </div>
         </div>

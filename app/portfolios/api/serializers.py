@@ -14,6 +14,7 @@ class ProjectSerializer(ModelSerializer):
     portfolio_user_username = SerializerMethodField()
     portfolio_user_type = SerializerMethodField()
     tags = SerializerMethodField()
+    has_voted = SerializerMethodField()
 
     class Meta:
         model = Project
@@ -27,6 +28,7 @@ class ProjectSerializer(ModelSerializer):
             'description',
             'tags',
             'votes',
+            'has_voted'
         ]
 
     def get_portfolio_user_full_name(self, obj):
@@ -37,6 +39,9 @@ class ProjectSerializer(ModelSerializer):
 
     def get_portfolio_user_type(self, obj):
         return obj.portfolio.user.profile.get_user_type_display() if obj.portfolio.user else ''
+    
+    def get_has_voted(self, obj):
+        return obj.user_has_voted(self.context['request'].user) if self.context['request'].user.is_authenticated else False
 
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()] if obj.tags else []
